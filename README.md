@@ -667,6 +667,96 @@ L'application offre **trois modes de prediction** selectionnables via un RadioGr
 - Ethnicite depuis V4 Multitache (72.5% de precision)
 - Age depuis V2 Oriente
 
+#### Analyse Comparative - Pourquoi le Mode Hybride ?
+
+Lors des tests, nous avons observe que chaque approche avait des forces et faiblesses complementaires :
+
+**Test du Mode Oriente V2 (3 modeles separes)** :
+```
+Image 1: Femme Blanche 25 ans → Genre: Femme ✓ | Ethnicite: Noir ✗
+Image 2: Homme Noir 35 ans    → Genre: Homme ✓ | Ethnicite: Blanc ✗
+Image 3: Homme Asiatique 45   → Genre: Homme ✓ | Ethnicite: Indien ✗
+Image 4: Femme Indienne 28    → Genre: Femme ✓ | Ethnicite: Asiatique ✗
+Image 5: Homme Blanc 55 ans   → Genre: Homme ✓ | Ethnicite: Blanc ✓
+
+Resultat: Genre 5/5 (100%) | Ethnicite 1/5 (20%)
+Constat: Excellent pour le genre, mauvais pour l'ethnicite
+```
+
+**Test du Mode Multitache V4 (1 modele unifie)** :
+```
+Image 1: Femme Blanche 25 ans → Genre: Femme ✓ | Ethnicite: Blanc ✓
+Image 2: Homme Noir 35 ans    → Genre: Femme ✗ | Ethnicite: Noir ✓
+Image 3: Homme Asiatique 45   → Genre: Femme ✗ | Ethnicite: Asiatique ✓
+Image 4: Femme Indienne 28    → Genre: Femme ✓ | Ethnicite: Indien ✓
+Image 5: Homme Blanc 55 ans   → Genre: Homme ✓ | Ethnicite: Blanc ✓
+
+Resultat: Genre 3/5 (60%) | Ethnicite 5/5 (100%)
+Constat: Excellent pour l'ethnicite, biais vers "Femme" pour le genre
+```
+
+**Conclusion** : Les problemes de l'un sont resolus par l'autre !
+- V2 Oriente → Meilleur pour le **genre**
+- V4 Multitache → Meilleur pour l'**ethnicite**
+
+**Solution : Mode Hybride** - Fusion a l'execution (runtime ensemble) :
+
+#### Pourquoi Aucun Entrainement n'est Requis ?
+
+Le mode Hybride utilise une technique appelee **Model Ensembling at Inference Time** (fusion de modeles a l'inference).
+
+**Principe** : Au lieu de creer un nouveau modele, on reutilise les modeles existants deja entraines et on selectionne intelligemment leurs sorties :
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Image d'entree                           │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+          ┌─────────────────┼─────────────────┐
+          ▼                 ▼                 ▼
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ gender_v2.tflite│ │  age_v2.tflite  │ │multitask.tflite │
+│   (EXISTANT)    │ │   (EXISTANT)    │ │   (EXISTANT)    │
+│   ~5.5 MB       │ │   ~6.3 MB       │ │   ~11 MB        │
+└────────┬────────┘ └────────┬────────┘ └────────┬────────┘
+         │                   │                   │
+         ▼                   ▼                   ▼
+    Genre: 97.5%        Age: MAE 5.6      Ethnicite: 72.5%
+    (on garde ✓)        (on garde ✓)       (on garde ✓)
+```
+
+**Avantages de cette approche** :
+- **Pas de nouvel entrainement** : Economie de temps et de ressources GPU
+- **Pas de nouveau fichier .tflite** : On reutilise les fichiers existants
+- **Flexibilite** : Si un modele est ameliore, le mode Hybride en beneficie automatiquement
+- **Explicabilite** : On sait exactement quel modele produit quelle prediction
+
+**Implementation en Kotlin** :
+```kotlin
+// FacePredictorHybrid.kt - Charge 3 modeles, utilise le meilleur de chacun
+
+class FacePredictorHybrid(context: Context) {
+    private var genderInterpreter: Interpreter    // gender_v2_model.tflite
+    private var ageInterpreter: Interpreter       // age_v2_model.tflite
+    private var multitaskInterpreter: Interpreter // multitask_model.tflite
+
+    fun predict(bitmap: Bitmap): PredictionResult {
+        // Genre depuis V2 (avec CLAHE) - meilleur pour le genre
+        val gender = genderInterpreter.run(bitmap)
+
+        // Age depuis V2 - bon pour l'age
+        val age = ageInterpreter.run(bitmap)
+
+        // Ethnicite depuis V4 Multitask - meilleur pour l'ethnicite
+        val ethnicity = multitaskInterpreter.run(bitmap).ethnicityOutput
+
+        return PredictionResult(age, gender, ethnicity)
+    }
+}
+```
+
+**Resultat** : **97.5% sur le genre ET 72.5% sur l'ethnicite** sans aucun nouvel entrainement !
+
 ### Performances des Modeles
 
 #### Mode Oriente V2 (3 modeles)
