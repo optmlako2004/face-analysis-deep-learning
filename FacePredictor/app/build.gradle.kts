@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
     // Google Services plugin for Firebase
     id("com.google.gms.google-services")
 }
