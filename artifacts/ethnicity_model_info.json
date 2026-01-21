@@ -1,0 +1,21 @@
+{
+  "img_size": 128,
+  "classes": [
+    "White",
+    "Black",
+    "Asian",
+    "Indian",
+    "Others"
+  ],
+  "class_map": {
+    "0": "White",
+    "1": "Black",
+    "2": "Asian",
+    "3": "Indian",
+    "4": "Others"
+  },
+  "input_range": [
+    0,
+    255
+  ]
+}

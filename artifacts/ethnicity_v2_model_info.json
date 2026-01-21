@@ -1,0 +1,41 @@
+{
+  "version": "2.0",
+  "img_size": 128,
+  "num_classes": 5,
+  "classes": [
+    "White",
+    "Black",
+    "Asian",
+    "Indian",
+    "Others"
+  ],
+  "class_map": {
+    "0": "White",
+    "1": "Black",
+    "2": "Asian",
+    "3": "Indian",
+    "4": "Others"
+  },
+  "input_range": [
+    0,
+    255
+  ],
+  "confidence_threshold": 0.35,
+  "improvements": [
+    "5 classes avec Others",
+    "Syst\u00e8me de confiance",
+    "Rotation agressive (\u00b145\u00b0)",
+    "Focal Loss",
+    "Oversampling",
+    "Mixup",
+    "Label Smoothing",
+    "SE Attention",
+    "AdamW + L2 regularization"
+  ],
+  "metrics": {
+    "accuracy_simple": 0.26571067060312104,
+    "accuracy_with_confidence": 0.21720792914382117,
+    "f1_macro_simple": 0.26551206916334885,
+    "f1_macro_with_confidence": 0.23820957670204873
+  }
+}

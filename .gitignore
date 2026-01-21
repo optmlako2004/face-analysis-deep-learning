@@ -1,0 +1,76 @@
+# Environnement virtuel Python
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Dataset (trop volumineux pour GitHub)
+data/
+*.tar.gz
+*.zip
+
+# Modeles Keras (trop volumineux - utiliser les TFLite)
+artifacts/*.keras
+
+# Modeles TFLite v1 et anciens (exclus)
+artifacts/age_model.tflite
+artifacts/gender_model.tflite
+artifacts/ethnicity_model.tflite
+artifacts/multitask_v2_model.tflite
+
+# Garder les modeles TFLite v2 orientes et multitask v4
+# Ces fichiers seront inclus :
+# - artifacts/age_v2_model.tflite
+# - artifacts/gender_v2_model.tflite
+# - artifacts/ethnicity_v2_model.tflite
+# - artifacts/multitask_model.tflite (v4)
+
+# Garder les fichiers JSON et images de visualisation
+# (deja inclus par defaut)
+
+# Fichiers de cours (garder localement, exclure de GitHub)
+AI Introduction-1.pdf
+Cours 1_ Algèbre.ipynb
+Cours 2_ Optimisation.ipynb
+Cours 4_ MLP.ipynb
+Cours sur l'IA.pdf
+Cours_3__Peceptron.ipynb
+Cours_5__CNN.ipynb
+Sujet SAE 1.pdf
+Fruit_Classification.ipynb
+Etape_à_suivre_pour_créer_l'application_mobile.ipynb
+image_processing_generalist.ipynb
+convert.py
+run_age_training.py
+utkface_analysis.ipynb
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Fichiers temporaires
+*.tmp
+*.log
+
+# Claude
+.claude/
+
+# Android build files
+FacePredictor/.gradle/
+FacePredictor/build/
+FacePredictor/app/build/
+FacePredictor/local.properties
+FacePredictor/*.iml
+FacePredictor/.idea/
+FacePredictor/captures/
+FacePredictor/.externalNativeBuild/
+FacePredictor/.cxx/

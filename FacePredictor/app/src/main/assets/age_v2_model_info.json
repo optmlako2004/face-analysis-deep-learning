@@ -1,0 +1,27 @@
+{
+  "version": "2.0",
+  "img_size": 128,
+  "task": "regression",
+  "input_range": [
+    0,
+    255
+  ],
+  "age_range": [
+    0,
+    116
+  ],
+  "improvements": [
+    "CBAM Attention (Channel + Spatial)",
+    "Spatial attention pour zones de rides",
+    "Rotation agressive (\u00b145\u00b0)",
+    "Oversampling renforc\u00e9 jeunes (x2)",
+    "Huber Loss delta=3.0",
+    "Mixup",
+    "AdamW + L2"
+  ],
+  "metrics": {
+    "mae": 7.258908586453665,
+    "rmse": 9.631888695120477,
+    "r2": 0.7573773529616782
+  }
+}

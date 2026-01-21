@@ -1,0 +1,52 @@
+{
+  "model_type": "multitask_v2",
+  "version": "2.0",
+  "img_size": 128,
+  "input_range": [
+    0,
+    255
+  ],
+  "improvements": [
+    "Deeper heads (256->128)",
+    "Focal Loss for ethnicity",
+    "Label smoothing for gender",
+    "Squeeze-Excitation attention",
+    "AdamW optimizer",
+    "More aggressive backbone unfreezing"
+  ],
+  "outputs": {
+    "age": {
+      "type": "regression",
+      "output_name": "age_output"
+    },
+    "gender": {
+      "type": "binary_classification",
+      "output_name": "gender_output",
+      "classes": [
+        "Male",
+        "Female"
+      ],
+      "threshold": 0.5
+    },
+    "ethnicity": {
+      "type": "multiclass_classification",
+      "output_name": "ethnicity_output",
+      "classes": [
+        "White",
+        "Black",
+        "Asian",
+        "Indian",
+        "Others"
+      ]
+    }
+  },
+  "metrics": {
+    "age_mae": 5.781609058380127,
+    "age_rmse": 8.411046028137207,
+    "gender_accuracy": 0.8194640338504936,
+    "gender_f1": 0.8008711885500933,
+    "ethnicity_accuracy": 0.5980253878702397,
+    "ethnicity_f1_macro": 0.5109402381180261,
+    "ethnicity_f1_weighted": 0.6007824608070632
+  }
+}

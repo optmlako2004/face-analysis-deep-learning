@@ -1,0 +1,57 @@
+# =============================================================================
+# Requirements - SAE BUT3 Face Prediction
+# =============================================================================
+# Python version: 3.10+ (recommande: 3.11 ou 3.12)
+#
+# Pour installer: pip install -r requirements.txt
+#
+# IMPORTANT: Utiliser un environnement virtuel pour éviter les conflits!
+#   python -m venv .venv
+#   source .venv/bin/activate  (Linux/Mac)
+#   .venv\Scripts\activate     (Windows)
+# =============================================================================
+
+# --- Deep Learning Framework ---
+tensorflow>=2.15.0,<3.0.0    # Framework principal (compatible CPU et GPU)
+# Note: Pour GPU NVIDIA, installer également:
+#   - CUDA Toolkit 12.x
+#   - cuDNN 8.9+
+# Vérifier avec: python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+
+# --- Calcul Scientifique ---
+numpy>=1.24.0,<2.0.0         # Arrays et calculs numériques
+scipy>=1.11.0                # Fonctions scientifiques (zscore, stats)
+pandas>=2.0.0                # DataFrames et manipulation de données
+
+# --- Machine Learning ---
+scikit-learn>=1.3.0          # Métriques, splits, class_weight
+
+# --- Visualisation ---
+matplotlib>=3.7.0            # Graphiques de base
+seaborn>=0.12.0              # Graphiques statistiques avancés
+
+# --- Traitement d'Images ---
+pillow>=10.0.0               # Chargement et manipulation d'images (PIL)
+opencv-python>=4.8.0         # Traitement d'images avancé (CLAHE, rotations, etc.)
+
+# --- Utilitaires ---
+tqdm>=4.65.0                 # Barres de progression
+
+# --- Jupyter (si exécution locale) ---
+jupyter>=1.0.0               # Jupyter Notebook
+ipykernel>=6.0.0             # Kernel Python pour Jupyter
+ipywidgets>=8.0.0            # Widgets interactifs (tqdm notebook)
+
+# =============================================================================
+# Dépendances optionnelles (décommenter si nécessaire)
+# =============================================================================
+
+# --- Pour Google Colab ---
+# google-colab                 # API Colab (pré-installé sur Colab)
+
+# --- Pour le développement Android ---
+# (Voir FacePredictor/app/build.gradle pour les dépendances Android)
+
+# --- Pour les tests ---
+# pytest>=7.0.0
+# pytest-cov>=4.0.0

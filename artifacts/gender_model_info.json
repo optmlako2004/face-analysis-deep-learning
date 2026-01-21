@@ -1,0 +1,16 @@
+{
+  "img_size": 128,
+  "classes": [
+    "Male",
+    "Female"
+  ],
+  "class_map": {
+    "0": "Male",
+    "1": "Female"
+  },
+  "threshold": 0.5,
+  "input_range": [
+    0,
+    255
+  ]
+}
