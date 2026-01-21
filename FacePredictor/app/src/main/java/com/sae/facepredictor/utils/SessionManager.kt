@@ -3,6 +3,18 @@ package com.sae.facepredictor.utils
 import android.content.Context
 import android.content.SharedPreferences
 
+enum class PredictionMode(val value: Int, val label: String, val description: String) {
+    ORIENTED(0, "Orienté V2", "3 modèles spécialisés - Meilleur pour le genre"),
+    MULTITASK(1, "Multitâche V4", "1 modèle unifié - Meilleur pour l'ethnicité"),
+    HYBRID(2, "Hybride", "Combine le meilleur des deux modèles");
+
+    companion object {
+        fun fromValue(value: Int): PredictionMode {
+            return entries.find { it.value == value } ?: HYBRID
+        }
+    }
+}
+
 class SessionManager(context: Context) {
 
     private val prefs: SharedPreferences =
@@ -14,7 +26,7 @@ class SessionManager(context: Context) {
         private const val KEY_USERNAME = "username"
         private const val KEY_EMAIL = "email"
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
-        private const val KEY_USE_MULTITASK_MODEL = "use_multitask_model"
+        private const val KEY_PREDICTION_MODE = "prediction_mode"
     }
 
     fun saveSession(userId: Long, username: String, email: String) {
@@ -43,10 +55,17 @@ class SessionManager(context: Context) {
     val email: String?
         get() = prefs.getString(KEY_EMAIL, null)
 
-    // Model preference: true = Multitask V4, false = Oriented V2 (3 separate models)
-    var useMultitaskModel: Boolean
-        get() = prefs.getBoolean(KEY_USE_MULTITASK_MODEL, false) // Default: Oriented V2
+    // Prediction mode: ORIENTED, MULTITASK, or HYBRID (default)
+    var predictionMode: PredictionMode
+        get() = PredictionMode.fromValue(prefs.getInt(KEY_PREDICTION_MODE, PredictionMode.HYBRID.value))
         set(value) {
-            prefs.edit().putBoolean(KEY_USE_MULTITASK_MODEL, value).apply()
+            prefs.edit().putInt(KEY_PREDICTION_MODE, value.value).apply()
+        }
+
+    // Backward compatibility
+    var useMultitaskModel: Boolean
+        get() = predictionMode == PredictionMode.MULTITASK
+        set(value) {
+            predictionMode = if (value) PredictionMode.MULTITASK else PredictionMode.ORIENTED
         }
 }

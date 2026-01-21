@@ -14,7 +14,7 @@ Ce projet developpe une **application mobile Android intelligente** capable de p
 | Import galerie       | Charger une photo existante                    | Fait   |
 | Detection de visage  | MediaPipe Face Detection                       | Fait   |
 | Prediction IA        | Age, Genre, Ethnicite                          | Fait   |
-| Switch de modele     | Multitache V4 ou Oriente V2 (3 modeles)        | Fait   |
+| Switch de modele     | 3 modes: Hybride, Oriente V2, Multitache V4    | Fait   |
 | Authentification     | Firebase Auth (Email + Google Sign-In)         | Fait   |
 | Historique           | Sauvegarder les predictions (Firestore)        | Fait   |
 | Page infos modele    | Affichage dynamique des metriques              | Fait   |
@@ -646,12 +646,26 @@ L'application **FacePredictor** est une application Android native (Kotlin) qui 
 
 ### Modes de Prediction
 
-L'application offre **deux modes de prediction** selectionnables via un switch :
+L'application offre **trois modes de prediction** selectionnables via un RadioGroup :
 
-| Mode             | Description                       | Modeles                                          |
-| ---------------- | --------------------------------- | ------------------------------------------------ |
-| **Oriente V2**   | 3 modeles specialises independants | age_v2, gender_v2, ethnicity_v2                  |
-| **Multitache V4**| 1 modele unifie pour les 3 taches | multitask_model (EfficientNetB0 multi-output)    |
+| Mode              | Description                                | Modeles utilises                                 |
+| ----------------- | ------------------------------------------ | ------------------------------------------------ |
+| **Hybride**       | Combine le meilleur des 2 approches        | Gender V2 + Ethnicity V4 + Age V2                |
+| **Oriente V2**    | 3 modeles specialises independants         | age_v2, gender_v2, ethnicity_v2                  |
+| **Multitache V4** | 1 modele unifie pour les 3 taches          | multitask_model (EfficientNetB0 multi-output)    |
+
+#### Comparaison des Performances (sur 40 images test)
+
+| Mode              | Genre   | Ethnicite | Age MAE  |
+| ----------------- | ------- | --------- | -------- |
+| **Hybride**       | 97.5%   | 72.5%     | 5.62 ans |
+| **Oriente V2**    | 97.5%   | 30.0%     | 5.62 ans |
+| **Multitache V4** | 77.5%   | 72.5%     | 5.22 ans |
+
+**Recommandation** : Le mode **Hybride** est recommande car il combine les forces des deux approches :
+- Genre depuis V2 Oriente (97.5% de precision)
+- Ethnicite depuis V4 Multitache (72.5% de precision)
+- Age depuis V2 Oriente
 
 ### Performances des Modeles
 
@@ -685,6 +699,7 @@ FacePredictor/
 |   |   |-- ml/                    # Modeles TFLite
 |   |   |   |-- FacePredictorModel.kt      # Multitache V4
 |   |   |   |-- FacePredictorModelV2.kt    # Oriente V2
+|   |   |   |-- FacePredictorHybrid.kt     # Mode Hybride (combine V2 + V4)
 |   |   |   |-- FaceDetectorHelper.kt      # MediaPipe
 |   |   |-- ui/                    # Interfaces
 |   |   |   |-- auth/              # Login, Register
@@ -817,7 +832,7 @@ R: **V2** est actuellement la meilleure. V4 est en cours de test.
 | Detection visage (MediaPipe)     | Fait    |
 | Authentification (Firebase)      | Fait    |
 | Historique predictions           | Fait    |
-| Switch Multitache/Oriente        | Fait    |
+| Switch 3 modes (Hybride/Oriente/Multitache) | Fait    |
 | Rapport technique                | A faire |
 | Presentation                     | A faire |
 

@@ -158,7 +158,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Model Mode Switch Card -->
+        <!-- Model Mode Selection Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardModelSwitch"
             android:layout_width="match_parent"
@@ -186,47 +186,72 @@
                         app:tint="@color/primary"
                         android:contentDescription="Mode de prédiction" />
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="@dimen/margin_medium">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Mode de Prédiction"
-                            android:textSize="@dimen/text_size_large"
-                            android:textColor="@color/text_primary" />
-
-                        <TextView
-                            android:id="@+id/tvModelModeDescription"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Modèles Orientés V2 (3 modèles)"
-                            android:textSize="@dimen/text_size_small"
-                            android:textColor="@color/text_secondary"
-                            android:layout_marginTop="2dp" />
-
-                    </LinearLayout>
-
-                    <com.google.android.material.materialswitch.MaterialSwitch
-                        android:id="@+id/switchModelMode"
+                    <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:text="Mode de Prédiction"
+                        android:textSize="@dimen/text_size_large"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginStart="@dimen/margin_medium" />
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tvModelModeInfo"
+                <RadioGroup
+                    android:id="@+id/radioGroupMode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Orienté: 3 modèles spécialisés (âge, genre, ethnicité)\nMultitâche: 1 modèle unifié pour les 3 tâches"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_secondary"
-                    android:layout_marginTop="@dimen/margin_small"
-                    android:lineSpacingExtra="2dp" />
+                    android:layout_marginTop="@dimen/margin_medium"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radioHybrid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Hybride (Recommandé)"
+                        android:textColor="@color/text_primary"
+                        android:checked="true" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Genre V2 + Ethnicité V4 + Age V2"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary"
+                        android:paddingStart="32dp"
+                        android:paddingBottom="8dp" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radioOriented"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Orienté V2"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="3 modèles spécialisés - Meilleur pour le genre"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary"
+                        android:paddingStart="32dp"
+                        android:paddingBottom="8dp" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radioMultitask"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Multitâche V4"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="1 modèle unifié - Meilleur pour l'ethnicité"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary"
+                        android:paddingStart="32dp" />
+
+                </RadioGroup>
 
             </LinearLayout>
 

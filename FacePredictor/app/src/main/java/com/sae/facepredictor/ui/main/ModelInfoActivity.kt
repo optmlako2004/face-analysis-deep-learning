@@ -3,6 +3,7 @@ package com.sae.facepredictor.ui.main
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.sae.facepredictor.databinding.ActivityModelInfoBinding
+import com.sae.facepredictor.utils.PredictionMode
 import com.sae.facepredictor.utils.SessionManager
 import org.json.JSONObject
 
@@ -29,12 +30,82 @@ class ModelInfoActivity : AppCompatActivity() {
     }
 
     private fun displayModelInfo() {
-        val useMultitask = sessionManager.useMultitaskModel
+        when (sessionManager.predictionMode) {
+            PredictionMode.HYBRID -> displayHybridInfo()
+            PredictionMode.MULTITASK -> displayMultitaskInfo()
+            PredictionMode.ORIENTED -> displayOrientedV2Info()
+        }
+    }
 
-        if (useMultitask) {
-            displayMultitaskInfo()
-        } else {
-            displayOrientedV2Info()
+    private fun displayHybridInfo() {
+        val genderInfo = loadModelInfo("gender_v2_model_info.json")
+        val ageInfo = loadModelInfo("age_v2_model_info.json")
+        val multitaskInfo = loadModelInfo("multitask_model_info.json")
+
+        // Model header info
+        binding.tvModelName.text = "Face Predictor Hybride"
+        binding.tvModelType.text = "Combine le meilleur des 2 approches"
+        binding.tvInputSize.text = "Entree: 128x128x3 pixels (RGB)"
+
+        // Gender metrics (from V2 - best for gender)
+        binding.tvGenderMetrics.text = buildString {
+            appendLine("Source: Gender V2 (meilleur)")
+            appendLine("Modele: gender_v2_model.tflite")
+            appendLine("Type: Classification binaire + CLAHE")
+            appendLine("Classes: Homme, Femme")
+            if (genderInfo != null) {
+                val metrics = genderInfo.optJSONObject("metrics")
+                if (metrics != null) {
+                    val accuracy = metrics.optDouble("accuracy", 0.0) * 100
+                    val f1 = metrics.optDouble("f1", 0.0) * 100
+                    appendLine("Precision: ${String.format("%.1f", accuracy)}%")
+                    appendLine("F1-Score: ${String.format("%.1f", f1)}%")
+                }
+            }
+        }
+
+        // Age metrics (from V2)
+        binding.tvAgeMetrics.text = buildString {
+            appendLine("Source: Age V2")
+            appendLine("Modele: age_v2_model.tflite")
+            appendLine("Type: Regression")
+            if (ageInfo != null) {
+                val metrics = ageInfo.optJSONObject("metrics")
+                if (metrics != null) {
+                    val mae = metrics.optDouble("mae", 0.0)
+                    val rmse = metrics.optDouble("rmse", 0.0)
+                    appendLine("MAE: ${String.format("%.2f", mae)} ans")
+                    appendLine("RMSE: ${String.format("%.2f", rmse)} ans")
+                }
+            }
+        }
+
+        // Ethnicity metrics (from V4 Multitask - best for ethnicity)
+        binding.tvEthnicityMetrics.text = buildString {
+            appendLine("Source: Multitache V4 (meilleur)")
+            appendLine("Modele: multitask_model.tflite")
+            appendLine("Type: Softmax (4 classes)")
+            appendLine("Classes: Blanc, Noir, Asiatique, Indien")
+            if (multitaskInfo != null) {
+                val metrics = multitaskInfo.optJSONObject("metrics")
+                if (metrics != null) {
+                    val accuracy = metrics.optDouble("ethnicity_accuracy", 0.0) * 100
+                    val f1 = metrics.optDouble("ethnicity_f1_macro", 0.0) * 100
+                    appendLine("Precision: ${String.format("%.1f", accuracy)}%")
+                    appendLine("F1-Score (macro): ${String.format("%.1f", f1)}%")
+                }
+            }
+        }
+
+        // Improvements/Techniques
+        binding.tvImprovements.text = buildString {
+            appendLine("- Combine les forces des 2 approches")
+            appendLine("- Genre: V2 Oriente (100% correct en test)")
+            appendLine("- Ethnicite: V4 Multitache (meilleur)")
+            appendLine("- Age: V2 Oriente")
+            appendLine("- CLAHE pour le genre")
+            appendLine("- EfficientNetB0 backbone")
+            appendLine("- Prediction optimale par tache")
         }
     }
 

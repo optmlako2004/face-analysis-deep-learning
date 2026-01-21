@@ -22,6 +22,7 @@ import com.sae.facepredictor.ui.history.HistoryActivity
 import com.sae.facepredictor.ui.prediction.PredictionResultActivity
 import com.sae.facepredictor.data.firebase.FirebaseAuthService
 import com.sae.facepredictor.utils.LogCapture
+import com.sae.facepredictor.utils.PredictionMode
 import com.sae.facepredictor.utils.SessionManager
 import com.sae.facepredictor.utils.showToast
 
@@ -195,25 +196,25 @@ class MainActivity : AppCompatActivity(), LogCapture.LogListener {
     }
 
     private fun setupModelSwitch() {
-        // Initialize switch state from preferences
-        val useMultitask = sessionManager.useMultitaskModel
-        binding.switchModelMode.isChecked = useMultitask
-        updateModelModeDescription(useMultitask)
-
-        // Handle switch changes
-        binding.switchModelMode.setOnCheckedChangeListener { _, isChecked ->
-            sessionManager.useMultitaskModel = isChecked
-            updateModelModeDescription(isChecked)
-            LogCapture.i(TAG, "Model mode changed: ${if (isChecked) "Multitask V4" else "Oriented V2"}")
-            showToast(if (isChecked) "Mode Multitâche activé" else "Mode Orienté activé")
+        // Initialize radio button state from preferences
+        val currentMode = sessionManager.predictionMode
+        when (currentMode) {
+            PredictionMode.HYBRID -> binding.radioHybrid.isChecked = true
+            PredictionMode.ORIENTED -> binding.radioOriented.isChecked = true
+            PredictionMode.MULTITASK -> binding.radioMultitask.isChecked = true
         }
-    }
 
-    private fun updateModelModeDescription(useMultitask: Boolean) {
-        binding.tvModelModeDescription.text = if (useMultitask) {
-            "Multitâche V4 (1 modèle unifié)"
-        } else {
-            "Modèles Orientés V2 (3 modèles)"
+        // Handle radio button changes
+        binding.radioGroupMode.setOnCheckedChangeListener { _, checkedId ->
+            val newMode = when (checkedId) {
+                R.id.radioHybrid -> PredictionMode.HYBRID
+                R.id.radioOriented -> PredictionMode.ORIENTED
+                R.id.radioMultitask -> PredictionMode.MULTITASK
+                else -> PredictionMode.HYBRID
+            }
+            sessionManager.predictionMode = newMode
+            LogCapture.i(TAG, "Model mode changed: ${newMode.label}")
+            showToast("Mode ${newMode.label} activé")
         }
     }
 

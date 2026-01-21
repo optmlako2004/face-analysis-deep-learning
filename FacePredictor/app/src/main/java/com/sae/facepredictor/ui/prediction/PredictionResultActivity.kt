@@ -17,9 +17,11 @@ import com.sae.facepredictor.data.firebase.FirestoreRepository
 import com.sae.facepredictor.data.model.PredictionResult
 import com.sae.facepredictor.databinding.ActivityPredictionResultBinding
 import com.sae.facepredictor.ml.FaceDetectorHelper
+import com.sae.facepredictor.ml.FacePredictorHybrid
 import com.sae.facepredictor.ml.FacePredictorModel
 import com.sae.facepredictor.ml.FacePredictorModelV2
 import com.sae.facepredictor.utils.LogCapture
+import com.sae.facepredictor.utils.PredictionMode
 import com.sae.facepredictor.utils.SessionManager
 import com.sae.facepredictor.utils.showToast
 import com.sae.facepredictor.utils.toPercentage
@@ -37,10 +39,11 @@ class PredictionResultActivity : AppCompatActivity() {
     private lateinit var firestoreRepository: FirestoreRepository
     private lateinit var sessionManager: SessionManager
 
-    // Support for both model types
+    // Support for all 3 model types
     private var predictorV2: FacePredictorModelV2? = null
     private var predictorMultitask: FacePredictorModel? = null
-    private var useMultitaskModel: Boolean = false
+    private var predictorHybrid: FacePredictorHybrid? = null
+    private var predictionMode: PredictionMode = PredictionMode.HYBRID
     private var faceDetector: FaceDetectorHelper? = null
 
     private var imagePath: String? = null
@@ -60,11 +63,11 @@ class PredictionResultActivity : AppCompatActivity() {
         authService = FirebaseAuthService.getInstance()
         firestoreRepository = FirestoreRepository.getInstance()
         sessionManager = SessionManager(this)
-        useMultitaskModel = sessionManager.useMultitaskModel
+        predictionMode = sessionManager.predictionMode
 
         imagePath = intent.getStringExtra(EXTRA_IMAGE_PATH)
         LogCapture.d(TAG, "Received image path: $imagePath")
-        LogCapture.d(TAG, "Using model: ${if (useMultitaskModel) "Multitask V4" else "Oriented V2"}")
+        LogCapture.d(TAG, "Using model: ${predictionMode.label}")
 
         setupUI()
 
@@ -92,12 +95,19 @@ class PredictionResultActivity : AppCompatActivity() {
         try {
             // Initialize the appropriate predictor based on user preference
             withContext(Dispatchers.IO) {
-                if (useMultitaskModel) {
-                    predictorMultitask = FacePredictorModel(this@PredictionResultActivity)
-                    LogCapture.d(TAG, "Predictor Multitask V4 initialized (1 unified model)")
-                } else {
-                    predictorV2 = FacePredictorModelV2(this@PredictionResultActivity)
-                    LogCapture.d(TAG, "Predictor V2 initialized (3 separate models)")
+                when (predictionMode) {
+                    PredictionMode.HYBRID -> {
+                        predictorHybrid = FacePredictorHybrid(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor HYBRID initialized (Gender V2 + Ethnicity V4 + Age V2)")
+                    }
+                    PredictionMode.ORIENTED -> {
+                        predictorV2 = FacePredictorModelV2(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor V2 initialized (3 separate models)")
+                    }
+                    PredictionMode.MULTITASK -> {
+                        predictorMultitask = FacePredictorModel(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor Multitask V4 initialized (1 unified model)")
+                    }
                 }
             }
 
@@ -172,10 +182,10 @@ class PredictionResultActivity : AppCompatActivity() {
             // Run prediction using the appropriate model
             val result = withContext(Dispatchers.Default) {
                 try {
-                    if (useMultitaskModel) {
-                        predictorMultitask?.predict(faceBitmap)
-                    } else {
-                        predictorV2?.predict(faceBitmap)
+                    when (predictionMode) {
+                        PredictionMode.HYBRID -> predictorHybrid?.predict(faceBitmap)
+                        PredictionMode.ORIENTED -> predictorV2?.predict(faceBitmap)
+                        PredictionMode.MULTITASK -> predictorMultitask?.predict(faceBitmap)
                     }
                 } catch (e: Exception) {
                     LogCapture.e(TAG, "Prediction exception: ${e.message}", e)
@@ -396,6 +406,7 @@ class PredictionResultActivity : AppCompatActivity() {
         super.onDestroy()
         predictorV2?.close()
         predictorMultitask?.close()
+        predictorHybrid?.close()
         faceDetector?.close()
     }
 }
