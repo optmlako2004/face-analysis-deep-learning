@@ -55,8 +55,11 @@ class HistoryActivity : AppCompatActivity() {
             }
         )
 
-        binding.rvHistory.layoutManager = LinearLayoutManager(this)
-        binding.rvHistory.adapter = adapter
+        binding.rvHistory.apply {
+            layoutManager = LinearLayoutManager(this@HistoryActivity)
+            adapter = this@HistoryActivity.adapter
+            setHasFixedSize(true)
+        }
     }
 
     private fun loadHistory() {
@@ -71,6 +74,8 @@ class HistoryActivity : AppCompatActivity() {
     }
 
     private fun updateUI(predictions: List<FirestorePrediction>) {
+        binding.progressBar.visibility = View.GONE
+
         if (predictions.isEmpty()) {
             binding.emptyState.visibility = View.VISIBLE
             binding.rvHistory.visibility = View.GONE

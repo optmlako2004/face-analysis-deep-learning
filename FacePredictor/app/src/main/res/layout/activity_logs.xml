@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/toolbar_height"
+        android:background="@color/surface"
+        app:title="Logs de Debug"
+        app:titleTextColor="@color/text_primary"
+        app:navigationIcon="@drawable/ic_back"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:id="@+id/actionBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/margin_small"
+        android:background="@color/surface_variant"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCopyLogs"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="@dimen/margin_tiny"
+            android:text="Copier"
+            android:textSize="@dimen/text_size_small"
+            app:icon="@android:drawable/ic_menu_share"
+            app:iconGravity="textStart" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRefreshLogs"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="@dimen/margin_tiny"
+            android:text="Actualiser"
+            android:textSize="@dimen/text_size_small"
+            app:icon="@android:drawable/ic_menu_rotate"
+            app:iconGravity="textStart" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClearLogs"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/margin_tiny"
+            android:text="Effacer"
+            android:textSize="@dimen/text_size_small"
+            app:icon="@android:drawable/ic_menu_delete"
+            app:iconGravity="textStart" />
+
+    </LinearLayout>
+
+    <!-- Logs Content -->
+    <ScrollView
+        android:id="@+id/scrollLogs"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#1E1E2E"
+        app:layout_constraintTop_toBottomOf="@id/actionBar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvLogs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/margin_medium"
+            android:fontFamily="monospace"
+            android:textSize="11sp"
+            android:textColor="#A6E3A1"
+            android:lineSpacingExtra="2dp"
+            android:text="Chargement des logs..." />
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

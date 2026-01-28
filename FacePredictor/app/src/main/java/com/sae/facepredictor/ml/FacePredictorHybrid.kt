@@ -16,10 +16,12 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * FacePredictorHybrid - Combine le meilleur des deux approches:
- * - Genre: gender_v2_model.tflite (V2 Orienté - meilleur pour le genre)
- * - Age: age_v2_model.tflite (V2 Orienté)
- * - Ethnicité: multitask_model.tflite (V4 Multitâche - meilleur pour l'ethnicité)
+ * FacePredictorHybrid - Combine les modèles MobileNet:
+ * - Genre: gender_v3_mobilenet.tflite (MobileNetV3Small)
+ * - Age: age_v3_mobilenet.tflite (MobileNetV3Small + CBAM)
+ * - Ethnicité: multitask_model_v5_mobilenet.tflite (MobileNetV3Small multitâche)
+ *
+ * Optimisé pour la rapidité et la légèreté
  */
 class FacePredictorHybrid(private val context: Context) {
 
@@ -48,22 +50,22 @@ class FacePredictorHybrid(private val context: Context) {
                 setNumThreads(4)
             }
 
-            // Load Gender V2 model (best for gender)
-            LogCapture.d(TAG, "Loading gender_v2 model for hybrid...")
-            genderInterpreter = Interpreter(loadModelFile("gender_v2_model.tflite"), options)
-            LogCapture.i(TAG, "Gender V2 model loaded")
+            // Load Gender MobileNet model
+            LogCapture.d(TAG, "Loading gender_v3_mobilenet for hybrid...")
+            genderInterpreter = Interpreter(loadModelFile("gender_v3_mobilenet.tflite"), options)
+            LogCapture.i(TAG, "Gender MobileNet model loaded")
 
-            // Load Age V2 model
-            LogCapture.d(TAG, "Loading age_v2 model for hybrid...")
-            ageInterpreter = Interpreter(loadModelFile("age_v2_model.tflite"), options)
-            LogCapture.i(TAG, "Age V2 model loaded")
+            // Load Age MobileNet model
+            LogCapture.d(TAG, "Loading age_v3_mobilenet for hybrid...")
+            ageInterpreter = Interpreter(loadModelFile("age_v3_mobilenet.tflite"), options)
+            LogCapture.i(TAG, "Age MobileNet model loaded")
 
-            // Load Multitask V4 model (best for ethnicity)
-            LogCapture.d(TAG, "Loading multitask_model for hybrid ethnicity...")
-            multitaskInterpreter = Interpreter(loadModelFile("multitask_model.tflite"), options)
-            LogCapture.i(TAG, "Multitask V4 model loaded")
+            // Load Multitask MobileNet V5 model (for ethnicity)
+            LogCapture.d(TAG, "Loading multitask_model_v5_mobilenet for hybrid ethnicity...")
+            multitaskInterpreter = Interpreter(loadModelFile("multitask_model_v5_mobilenet.tflite"), options)
+            LogCapture.i(TAG, "Multitask MobileNet V5 model loaded")
 
-            LogCapture.i(TAG, "Hybrid model loaded successfully (Gender V2 + Age V2 + Ethnicity V4)")
+            LogCapture.i(TAG, "Hybrid model loaded successfully (MobileNet Gender + Age + Ethnicity V5)")
         } catch (e: Exception) {
             initError = e.message
             LogCapture.e(TAG, "Error loading hybrid models: ${e.message}", e)
@@ -105,7 +107,7 @@ class FacePredictorHybrid(private val context: Context) {
             val genderProb = genderOutput[0][0]
             val gender = if (genderProb > genderThreshold) Gender.FEMALE else Gender.MALE
             val genderConfidence = if (genderProb > genderThreshold) genderProb else (1f - genderProb)
-            LogCapture.d(TAG, "Gender (V2): ${gender.label} (conf: ${genderConfidence * 100}%)")
+            LogCapture.d(TAG, "Gender (MobileNet): ${gender.label} (conf: ${genderConfidence * 100}%)")
 
             // === Age from V2 ===
             val ageOutput = Array(1) { FloatArray(1) }
@@ -113,7 +115,7 @@ class FacePredictorHybrid(private val context: Context) {
             ageInterpreter!!.run(inputBuffer, ageOutput)
 
             val age = ageOutput[0][0].toInt().coerceIn(0, 116)
-            LogCapture.d(TAG, "Age (V2): $age ans")
+            LogCapture.d(TAG, "Age (MobileNet): $age ans")
 
             // === Ethnicity from V4 Multitask (best for ethnicity) ===
             val genderOutV4 = Array(1) { FloatArray(1) }
@@ -132,7 +134,7 @@ class FacePredictorHybrid(private val context: Context) {
             val maxIdx = ethProbs.indices.maxByOrNull { ethProbs[it] } ?: 0
             val ethnicity = ethnicityFromIndexV4(maxIdx)
             val ethnicityConfidence = ethProbs[maxIdx]
-            LogCapture.d(TAG, "Ethnicity (V4): ${ethnicity.label} (conf: ${ethnicityConfidence * 100}%)")
+            LogCapture.d(TAG, "Ethnicity (MobileNet V5): ${ethnicity.label} (conf: ${ethnicityConfidence * 100}%)")
 
             LogCapture.i(TAG, "HYBRID Result: Age=$age, Gender=${gender.label}, Ethnicity=${ethnicity.label}")
 

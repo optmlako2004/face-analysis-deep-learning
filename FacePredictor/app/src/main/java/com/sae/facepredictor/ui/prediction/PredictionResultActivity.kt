@@ -14,12 +14,15 @@ import coil.load
 import com.sae.facepredictor.R
 import com.sae.facepredictor.data.firebase.FirebaseAuthService
 import com.sae.facepredictor.data.firebase.FirestoreRepository
+import com.sae.facepredictor.data.model.Ethnicity
+import com.sae.facepredictor.data.model.Gender
 import com.sae.facepredictor.data.model.PredictionResult
+import com.sae.facepredictor.ui.camera.RealtimeCameraActivity
 import com.sae.facepredictor.databinding.ActivityPredictionResultBinding
 import com.sae.facepredictor.ml.FaceDetectorHelper
 import com.sae.facepredictor.ml.FacePredictorHybrid
-import com.sae.facepredictor.ml.FacePredictorModel
-import com.sae.facepredictor.ml.FacePredictorModelV2
+import com.sae.facepredictor.ml.FacePredictorMobileNet
+import com.sae.facepredictor.ml.FacePredictorMultitaskMobileNet
 import com.sae.facepredictor.utils.LogCapture
 import com.sae.facepredictor.utils.PredictionMode
 import com.sae.facepredictor.utils.SessionManager
@@ -39,9 +42,9 @@ class PredictionResultActivity : AppCompatActivity() {
     private lateinit var firestoreRepository: FirestoreRepository
     private lateinit var sessionManager: SessionManager
 
-    // Support for all 3 model types
-    private var predictorV2: FacePredictorModelV2? = null
-    private var predictorMultitask: FacePredictorModel? = null
+    // Support for all 3 model types (MobileNet)
+    private var predictorMobileNet: FacePredictorMobileNet? = null
+    private var predictorMultitaskMobileNet: FacePredictorMultitaskMobileNet? = null
     private var predictorHybrid: FacePredictorHybrid? = null
     private var predictionMode: PredictionMode = PredictionMode.HYBRID
     private var faceDetector: FaceDetectorHelper? = null
@@ -71,10 +74,51 @@ class PredictionResultActivity : AppCompatActivity() {
 
         setupUI()
 
-        // Initialize predictor and process image
-        lifecycleScope.launch {
-            initAndProcess()
+        // Check if this is a realtime result (pre-computed)
+        val isRealtimeResult = intent.getBooleanExtra(RealtimeCameraActivity.EXTRA_REALTIME_RESULT, false)
+
+        if (isRealtimeResult) {
+            // Use pre-computed result from realtime camera
+            handleRealtimeResult()
+        } else {
+            // Initialize predictor and process image
+            lifecycleScope.launch {
+                initAndProcess()
+            }
         }
+    }
+
+    private fun handleRealtimeResult() {
+        LogCapture.d(TAG, "Handling pre-computed realtime result")
+
+        // Extract result from intent
+        val age = intent.getIntExtra(RealtimeCameraActivity.EXTRA_AGE, 0)
+        val ageConfidence = intent.getFloatExtra(RealtimeCameraActivity.EXTRA_AGE_CONFIDENCE, 0f)
+        val genderName = intent.getStringExtra(RealtimeCameraActivity.EXTRA_GENDER) ?: Gender.MALE.name
+        val genderConfidence = intent.getFloatExtra(RealtimeCameraActivity.EXTRA_GENDER_CONFIDENCE, 0f)
+        val ethnicityName = intent.getStringExtra(RealtimeCameraActivity.EXTRA_ETHNICITY) ?: Ethnicity.WHITE.name
+        val ethnicityConfidence = intent.getFloatExtra(RealtimeCameraActivity.EXTRA_ETHNICITY_CONFIDENCE, 0f)
+
+        val result = PredictionResult(
+            age = age,
+            ageConfidence = ageConfidence,
+            gender = Gender.valueOf(genderName),
+            genderConfidence = genderConfidence,
+            ethnicity = Ethnicity.valueOf(ethnicityName),
+            ethnicityConfidence = ethnicityConfidence
+        )
+
+        // Store for saving
+        currentResult = result
+        savedImagePath = imagePath
+
+        // Load and display image
+        imagePath?.let { path ->
+            binding.ivPreview.load(File(path))
+        }
+
+        // Display result directly
+        displayResult(result)
     }
 
     private fun setupUI() {
@@ -98,15 +142,15 @@ class PredictionResultActivity : AppCompatActivity() {
                 when (predictionMode) {
                     PredictionMode.HYBRID -> {
                         predictorHybrid = FacePredictorHybrid(this@PredictionResultActivity)
-                        LogCapture.d(TAG, "Predictor HYBRID initialized (Gender V2 + Ethnicity V4 + Age V2)")
+                        LogCapture.d(TAG, "Predictor HYBRID initialized (MobileNet)")
                     }
                     PredictionMode.ORIENTED -> {
-                        predictorV2 = FacePredictorModelV2(this@PredictionResultActivity)
-                        LogCapture.d(TAG, "Predictor V2 initialized (3 separate models)")
+                        predictorMobileNet = FacePredictorMobileNet(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor MobileNet V3 initialized (3 separate models)")
                     }
                     PredictionMode.MULTITASK -> {
-                        predictorMultitask = FacePredictorModel(this@PredictionResultActivity)
-                        LogCapture.d(TAG, "Predictor Multitask V4 initialized (1 unified model)")
+                        predictorMultitaskMobileNet = FacePredictorMultitaskMobileNet(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor Multitask MobileNet V5 initialized (1 unified model)")
                     }
                 }
             }
@@ -184,8 +228,8 @@ class PredictionResultActivity : AppCompatActivity() {
                 try {
                     when (predictionMode) {
                         PredictionMode.HYBRID -> predictorHybrid?.predict(faceBitmap)
-                        PredictionMode.ORIENTED -> predictorV2?.predict(faceBitmap)
-                        PredictionMode.MULTITASK -> predictorMultitask?.predict(faceBitmap)
+                        PredictionMode.ORIENTED -> predictorMobileNet?.predict(faceBitmap)
+                        PredictionMode.MULTITASK -> predictorMultitaskMobileNet?.predict(faceBitmap)
                     }
                 } catch (e: Exception) {
                     LogCapture.e(TAG, "Prediction exception: ${e.message}", e)
@@ -404,8 +448,8 @@ class PredictionResultActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        predictorV2?.close()
-        predictorMultitask?.close()
+        predictorMobileNet?.close()
+        predictorMultitaskMobileNet?.close()
         predictorHybrid?.close()
         faceDetector?.close()
     }

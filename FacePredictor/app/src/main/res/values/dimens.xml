@@ -1,27 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Margins and Padding -->
+    <dimen name="margin_tiny">4dp</dimen>
     <dimen name="margin_small">8dp</dimen>
     <dimen name="margin_medium">16dp</dimen>
     <dimen name="margin_large">24dp</dimen>
     <dimen name="margin_xlarge">32dp</dimen>
+    <dimen name="margin_xxlarge">48dp</dimen>
 
     <!-- Button -->
     <dimen name="button_height">56dp</dimen>
-    <dimen name="button_corner_radius">8dp</dimen>
+    <dimen name="button_height_large">64dp</dimen>
+    <dimen name="button_corner_radius">12dp</dimen>
+    <dimen name="button_corner_radius_large">16dp</dimen>
+
+    <!-- Hero button -->
+    <dimen name="hero_button_height">140dp</dimen>
+    <dimen name="hero_icon_size">56dp</dimen>
 
     <!-- Card -->
     <dimen name="card_corner_radius">16dp</dimen>
-    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_corner_radius_large">20dp</dimen>
+    <dimen name="card_elevation">2dp</dimen>
+    <dimen name="card_elevation_pressed">8dp</dimen>
+
+    <!-- Grid card (for 2x2 layout) -->
+    <dimen name="grid_card_height">100dp</dimen>
+    <dimen name="grid_icon_size">32dp</dimen>
 
     <!-- Image -->
-    <dimen name="preview_image_size">300dp</dimen>
-    <dimen name="history_thumbnail_size">80dp</dimen>
+    <dimen name="preview_image_size">280dp</dimen>
+    <dimen name="history_thumbnail_size">72dp</dimen>
+    <dimen name="avatar_size">48dp</dimen>
+
+    <!-- Icon -->
+    <dimen name="icon_size_small">20dp</dimen>
+    <dimen name="icon_size_medium">24dp</dimen>
+    <dimen name="icon_size_large">32dp</dimen>
+    <dimen name="icon_size_xlarge">48dp</dimen>
 
     <!-- Text -->
+    <dimen name="text_size_tiny">10sp</dimen>
+    <dimen name="text_size_caption">11sp</dimen>
     <dimen name="text_size_small">12sp</dimen>
     <dimen name="text_size_medium">14sp</dimen>
+    <dimen name="text_size_body">16sp</dimen>
     <dimen name="text_size_large">18sp</dimen>
     <dimen name="text_size_xlarge">24sp</dimen>
-    <dimen name="text_size_title">32sp</dimen>
+    <dimen name="text_size_title">28sp</dimen>
+    <dimen name="text_size_headline">32sp</dimen>
+
+    <!-- Toolbar -->
+    <dimen name="toolbar_height">64dp</dimen>
+
+    <!-- Bottom sheet -->
+    <dimen name="bottom_sheet_corner_radius">24dp</dimen>
+
+    <!-- Status bar indicator -->
+    <dimen name="mode_indicator_height">36dp</dimen>
 </resources>

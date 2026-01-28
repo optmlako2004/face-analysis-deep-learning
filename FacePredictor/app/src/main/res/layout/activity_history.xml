@@ -10,14 +10,25 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/primary"
+        android:layout_height="@dimen/toolbar_height"
+        android:background="@color/background"
         app:title="@string/prediction_history"
-        app:titleTextColor="@color/text_on_primary"
+        app:titleTextColor="@color/text_primary"
         app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/text_on_primary"
         app:menu="@menu/menu_history"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Loading indicator -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:indeterminateTint="@color/primary"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -26,8 +37,9 @@
         android:id="@+id/rvHistory"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="@dimen/margin_small"
+        android:padding="@dimen/margin_medium"
         android:clipToPadding="false"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -46,20 +58,39 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@drawable/ic_history"
-            app:tint="@color/text_secondary"
-            android:contentDescription="@string/no_history" />
+            app:cardCornerRadius="50dp"
+            app:cardBackgroundColor="@color/surface_variant"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_history"
+                app:tint="@color/text_tertiary"
+                android:contentDescription="@string/no_history" />
+
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/no_history"
+            android:text="Aucune prédiction"
             android:textSize="@dimen/text_size_large"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/margin_large" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vos analyses apparaîtront ici"
+            android:textSize="@dimen/text_size_medium"
             android:textColor="@color/text_secondary"
-            android:layout_marginTop="@dimen/margin_medium" />
+            android:layout_marginTop="@dimen/margin_small" />
 
     </LinearLayout>
 

@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.sae.facepredictor.R
 import com.sae.facepredictor.data.firebase.FirestorePrediction
 import com.sae.facepredictor.databinding.ItemHistoryBinding
 import com.sae.facepredictor.utils.toFormattedDate
@@ -33,17 +34,24 @@ class HistoryAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(prediction: FirestorePrediction) {
+            // Date
             binding.tvDate.text = prediction.createdAtMillis.toFormattedDate()
-            binding.tvAge.text = "Âge: ${prediction.predictedAge} ans"
-            binding.tvGender.text = "Genre: ${prediction.predictedGender}"
-            binding.tvEthnicity.text = "Ethnicité: ${prediction.predictedEthnicity}"
 
-            // Load thumbnail
+            // Age chip
+            binding.tvAge.text = "${prediction.predictedAge} ans"
+
+            // Gender chip
+            binding.tvGender.text = prediction.predictedGender
+
+            // Ethnicity
+            binding.tvEthnicity.text = prediction.predictedEthnicity
+
+            // Load thumbnail with placeholder to prevent layout jumps
             val file = File(prediction.imagePath)
-            if (file.exists()) {
-                binding.ivThumbnail.load(file) {
-                    crossfade(true)
-                }
+            binding.ivThumbnail.load(file) {
+                crossfade(true)
+                placeholder(R.drawable.ic_face)
+                error(R.drawable.ic_face)
             }
 
             binding.btnDelete.setOnClickListener {

@@ -10,19 +10,19 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/primary"
+        android:layout_height="@dimen/toolbar_height"
+        android:background="@color/background"
         app:title="@string/prediction_results"
-        app:titleTextColor="@color/text_on_primary"
+        app:titleTextColor="@color/text_primary"
         app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/text_on_primary"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,22 +32,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/margin_medium">
+            android:padding="@dimen/margin_large">
 
-            <!-- Image Preview -->
+            <!-- Image Preview Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardCornerRadius="@dimen/card_corner_radius_large"
                 app:cardElevation="@dimen/card_elevation"
-                android:layout_marginBottom="@dimen/margin_medium">
+                app:strokeWidth="0dp"
+                android:layout_marginBottom="@dimen/margin_large">
 
-                <ImageView
-                    android:id="@+id/ivPreview"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/preview_image_size"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="@string/prediction_results" />
+                    android:layout_height="@dimen/preview_image_size">
+
+                    <ImageView
+                        android:id="@+id/ivPreview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="@string/prediction_results" />
+
+                    <!-- Face detected badge -->
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFaceDetected"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="@dimen/margin_small"
+                        android:text="Visage détecté"
+                        android:textColor="@color/text_on_primary"
+                        app:chipBackgroundColor="@color/success"
+                        app:chipIcon="@drawable/ic_face"
+                        app:chipIconTint="@color/text_on_primary"
+                        android:visibility="gone" />
+
+                </FrameLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
@@ -57,41 +78,50 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardBackgroundColor="#FFEBEE"
-                android:layout_marginBottom="@dimen/margin_medium"
+                app:cardBackgroundColor="@color/error_light"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/error"
+                android:layout_marginBottom="@dimen/margin_large"
                 android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
                     android:padding="@dimen/margin_medium"
-                    android:gravity="center">
+                    android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
+                        android:layout_width="@dimen/icon_size_xlarge"
+                        android:layout_height="@dimen/icon_size_xlarge"
                         android:src="@drawable/ic_no_face"
-                        android:tint="#D32F2F"
+                        app:tint="@color/error"
                         android:contentDescription="@string/no_face_detected" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/no_face_detected"
-                        android:textSize="@dimen/text_size_large"
-                        android:textColor="#D32F2F"
-                        android:textStyle="bold"
-                        android:layout_marginTop="@dimen/margin_small" />
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="@dimen/margin_medium">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/no_face_message"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textColor="@color/text_secondary"
-                        android:gravity="center"
-                        android:layout_marginTop="@dimen/margin_small" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/no_face_detected"
+                            android:textSize="@dimen/text_size_body"
+                            android:textColor="@color/error"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/no_face_message"
+                            android:textSize="@dimen/text_size_small"
+                            android:textColor="@color/text_secondary"
+                            android:layout_marginTop="@dimen/margin_tiny" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -104,170 +134,291 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-            <!-- Age Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardBackgroundColor="@color/age_card"
-                android:layout_marginBottom="@dimen/margin_small">
+                <!-- Section Title -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Résultats de l'analyse"
+                    android:textSize="@dimen/text_size_large"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="@dimen/margin_medium" />
 
-                <LinearLayout
+                <!-- Age Card -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/margin_medium">
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardBackgroundColor="@color/age_card"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/age_card_border"
+                    android:layout_marginBottom="@dimen/margin_small">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/age"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textColor="@color/text_secondary" />
+                        android:orientation="horizontal"
+                        android:padding="@dimen/margin_medium"
+                        android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/tvAge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_xlarge"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
+                        <!-- Icon -->
+                        <FrameLayout
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/circle_age">
 
-                    <TextView
-                        android:id="@+id/tvAgeConfidence"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_small"
-                        android:textColor="@color/text_secondary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="🎂"
+                                android:textSize="20sp" />
 
-                </LinearLayout>
+                        </FrameLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                        <!-- Content -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/margin_medium">
 
-            <!-- Gender Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardBackgroundColor="@color/gender_card"
-                android:layout_marginBottom="@dimen/margin_small">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/age"
+                                android:textSize="@dimen/text_size_small"
+                                android:textColor="@color/text_secondary" />
 
-                <LinearLayout
+                            <TextView
+                                android:id="@+id/tvAge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/text_size_xlarge"
+                                android:textColor="@color/age_card_border"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <!-- Confidence -->
+                        <TextView
+                            android:id="@+id/tvAgeConfidence"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_size_small"
+                            android:textColor="@color/text_secondary"
+                            android:background="@drawable/chip_background"
+                            android:paddingHorizontal="@dimen/margin_small"
+                            android:paddingVertical="@dimen/margin_tiny" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Gender Card -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/margin_medium">
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardBackgroundColor="@color/gender_card"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/gender_card_border"
+                    android:layout_marginBottom="@dimen/margin_small">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/gender"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textColor="@color/text_secondary" />
+                        android:orientation="horizontal"
+                        android:padding="@dimen/margin_medium"
+                        android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/tvGender"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_xlarge"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
+                        <!-- Icon -->
+                        <FrameLayout
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/circle_gender">
 
-                    <TextView
-                        android:id="@+id/tvGenderConfidence"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_small"
-                        android:textColor="@color/text_secondary" />
+                            <TextView
+                                android:id="@+id/tvGenderIcon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="👤"
+                                android:textSize="20sp" />
 
-                </LinearLayout>
+                        </FrameLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                        <!-- Content -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/margin_medium">
 
-            <!-- Ethnicity Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardBackgroundColor="@color/ethnicity_card"
-                android:layout_marginBottom="@dimen/margin_medium">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/gender"
+                                android:textSize="@dimen/text_size_small"
+                                android:textColor="@color/text_secondary" />
 
-                <LinearLayout
+                            <TextView
+                                android:id="@+id/tvGender"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/text_size_xlarge"
+                                android:textColor="@color/gender_card_border"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <!-- Confidence -->
+                        <TextView
+                            android:id="@+id/tvGenderConfidence"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_size_small"
+                            android:textColor="@color/text_secondary"
+                            android:background="@drawable/chip_background"
+                            android:paddingHorizontal="@dimen/margin_small"
+                            android:paddingVertical="@dimen/margin_tiny" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Ethnicity Card -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/margin_medium">
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardBackgroundColor="@color/ethnicity_card"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/ethnicity_card_border"
+                    android:layout_marginBottom="@dimen/margin_large">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/ethnicity"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textColor="@color/text_secondary" />
+                        android:orientation="horizontal"
+                        android:padding="@dimen/margin_medium"
+                        android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/tvEthnicity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_xlarge"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
+                        <!-- Icon -->
+                        <FrameLayout
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/circle_ethnicity">
 
-                    <TextView
-                        android:id="@+id/tvEthnicityConfidence"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_small"
-                        android:textColor="@color/text_secondary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="🌍"
+                                android:textSize="20sp" />
 
-                </LinearLayout>
+                        </FrameLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                        <!-- Content -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/margin_medium">
 
-            <!-- Save Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSave"
-                style="@style/PrimaryButton"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
-                android:text="@string/save_prediction" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/ethnicity"
+                                android:textSize="@dimen/text_size_small"
+                                android:textColor="@color/text_secondary" />
 
-            </LinearLayout> <!-- End resultsContainer -->
+                            <TextView
+                                android:id="@+id/tvEthnicity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="@dimen/text_size_xlarge"
+                                android:textColor="@color/ethnicity_card_border"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                        <!-- Confidence -->
+                        <TextView
+                            android:id="@+id/tvEthnicityConfidence"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_size_small"
+                            android:textColor="@color/text_secondary"
+                            android:background="@drawable/chip_background"
+                            android:paddingHorizontal="@dimen/margin_small"
+                            android:paddingVertical="@dimen/margin_tiny" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Save Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSave"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:text="@string/save_prediction"
+                    android:textSize="@dimen/text_size_body"
+                    app:cornerRadius="@dimen/button_corner_radius"
+                    app:backgroundTint="@color/primary" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <!-- Loading Overlay -->
     <FrameLayout
         android:id="@+id/loadingOverlay"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#88FFFFFF"
+        android:background="@color/overlay_light"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            app:cardCornerRadius="@dimen/card_corner_radius"
+            app:cardElevation="8dp">
 
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/processing"
-                android:layout_marginTop="@dimen/margin_small" />
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="@dimen/margin_xlarge">
 
-        </LinearLayout>
+                <ProgressBar
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:indeterminateTint="@color/primary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/processing"
+                    android:textSize="@dimen/text_size_body"
+                    android:textColor="@color/text_primary"
+                    android:layout_marginTop="@dimen/margin_medium" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </FrameLayout>
 

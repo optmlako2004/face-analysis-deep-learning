@@ -1,0 +1,33 @@
+{
+  "version": "3.0",
+  "backbone": "MobileNetV3Small",
+  "img_size": 128,
+  "classes": [
+    "Male",
+    "Female"
+  ],
+  "class_map": {
+    "0": "Male",
+    "1": "Female"
+  },
+  "threshold": 0.4504302740097046,
+  "input_range": [
+    0,
+    255
+  ],
+  "preprocessing": {
+    "clahe": true
+  },
+  "features": [
+    "MobileNetV3Small backbone",
+    "CLAHE",
+    "SE Attention",
+    "Focal Loss",
+    "Optimized threshold"
+  ],
+  "metrics": {
+    "accuracy": 0.845634753268663,
+    "f1": 0.8480066445182725,
+    "auc_roc": 0.9330910599851129
+  }
+}

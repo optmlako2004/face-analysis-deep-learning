@@ -13,12 +13,69 @@
     <string name="have_account">Déjà un compte ? Connectez-vous</string>
     <string name="logout">Déconnexion</string>
 
+    <!-- Navigation -->
+    <string name="nav_home">Accueil</string>
+    <string name="nav_prediction">Prédiction</string>
+    <string name="nav_settings">Paramètres</string>
+    <string name="nav_account">Compte</string>
+
     <!-- Main -->
     <string name="welcome">Bienvenue, %s</string>
     <string name="take_photo">Prendre une photo</string>
     <string name="choose_gallery">Choisir depuis la galerie</string>
     <string name="view_history">Historique</string>
     <string name="model_info">Informations du modèle</string>
+
+    <!-- Home -->
+    <string name="home_title">FacePredictor</string>
+    <string name="home_subtitle">Intelligence Artificielle pour l\'analyse faciale</string>
+    <string name="home_description">Découvrez les caractéristiques d\'un visage grâce à nos modèles de deep learning optimisés.</string>
+    <string name="home_feature_age">Estimation de l\'âge</string>
+    <string name="home_feature_age_desc">Prédiction précise de l\'âge avec une marge d\'erreur de ~8 ans</string>
+    <string name="home_feature_gender">Détection du genre</string>
+    <string name="home_feature_gender_desc">Classification homme/femme avec ~78% de précision</string>
+    <string name="home_feature_ethnicity">Reconnaissance ethnique</string>
+    <string name="home_feature_ethnicity_desc">Identification parmi 4 groupes ethniques</string>
+    <string name="home_video_title">Comment ça marche ?</string>
+    <string name="home_video_placeholder">Vidéo explicative bientôt disponible</string>
+    <string name="home_stats_title">Vos statistiques</string>
+    <string name="home_stats_predictions">Prédictions effectuées</string>
+    <string name="home_get_started">Commencer une analyse</string>
+
+    <!-- Account -->
+    <string name="account_title">Mon Compte</string>
+    <string name="account_info">Informations personnelles</string>
+    <string name="account_email">Email</string>
+    <string name="account_name">Nom</string>
+    <string name="account_provider">Connecté via</string>
+    <string name="account_provider_google">Google</string>
+    <string name="account_provider_email">Email/Mot de passe</string>
+    <string name="account_security">Sécurité</string>
+    <string name="account_change_password">Modifier le mot de passe</string>
+    <string name="account_current_password">Mot de passe actuel</string>
+    <string name="account_new_password">Nouveau mot de passe</string>
+    <string name="account_confirm_new_password">Confirmer le nouveau mot de passe</string>
+    <string name="account_set_password">Définir un mot de passe</string>
+    <string name="account_set_password_desc">Vous êtes connecté via Google. Définissez un mot de passe pour vous connecter également par email.</string>
+    <string name="account_danger_zone">Zone de danger</string>
+    <string name="account_delete">Supprimer mon compte</string>
+    <string name="account_delete_desc">Cette action est irréversible. Toutes vos données seront supprimées.</string>
+    <string name="account_delete_confirm">Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.</string>
+    <string name="account_delete_success">Compte supprimé avec succès</string>
+    <string name="account_password_updated">Mot de passe mis à jour</string>
+    <string name="account_password_set">Mot de passe défini avec succès</string>
+    <string name="account_logout">Déconnexion</string>
+    <string name="account_logout_confirm">Voulez-vous vous déconnecter ?</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_model">Mode de prédiction</string>
+    <string name="settings_model_desc">Choisissez le modèle d\'IA à utiliser</string>
+    <string name="settings_about">À propos</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_developer">Développé par</string>
+    <string name="settings_debug">Débogage</string>
+    <string name="settings_logs">Voir les logs</string>
 
     <!-- Camera -->
     <string name="capture">Capturer</string>
@@ -60,6 +117,16 @@
     <string name="age_model">Modèle d\'âge</string>
     <string name="gender_model">Modèle de genre</string>
     <string name="ethnicity_model">Modèle d\'ethnicité</string>
+
+    <!-- Realtime -->
+    <string name="realtime_mode">Temps Réel</string>
+    <string name="realtime_description">Analyse en direct</string>
+    <string name="realtime_analyzing">Analyse en cours...</string>
+    <string name="realtime_ready">Prêt</string>
+    <string name="realtime_searching">Recherche de visage...</string>
+    <string name="realtime_no_face">Positionnez votre visage dans le cadre</string>
+    <string name="realtime_capture">Capturer cette prédiction</string>
+    <string name="realtime_saving">Sauvegarde...</string>
 
     <!-- Errors -->
     <string name="error_camera_permission">Permission caméra requise</string>

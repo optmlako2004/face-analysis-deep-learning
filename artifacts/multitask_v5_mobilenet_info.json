@@ -1,0 +1,51 @@
+{
+  "model_type": "multitask_v5_mobilenet",
+  "version": "5.0",
+  "backbone": "MobileNetV3Small",
+  "img_size": 128,
+  "input_range": [
+    0,
+    255
+  ],
+  "dataset": {
+    "total_images": 12600,
+    "images_per_group": 1575,
+    "balanced": true
+  },
+  "outputs": {
+    "age": {
+      "type": "regression",
+      "output_name": "age_output",
+      "description": "Age en ann\u00e9es"
+    },
+    "gender": {
+      "type": "binary_classification",
+      "output_name": "gender_output",
+      "classes": [
+        "Homme",
+        "Femme"
+      ],
+      "threshold": 0.5
+    },
+    "ethnicity": {
+      "type": "multiclass_classification",
+      "output_name": "ethnicity_output",
+      "num_classes": 4,
+      "classes": [
+        "Blanc",
+        "Noir",
+        "Asiatique",
+        "Indien"
+      ]
+    }
+  },
+  "metrics": {
+    "age_mae": 7.874427795410156,
+    "age_rmse": 10.992684364318848,
+    "gender_accuracy": 0.7788359788359789,
+    "gender_f1": 0.7546948356807511,
+    "ethnicity_accuracy": 0.5920634920634921,
+    "ethnicity_f1_macro": 0.5872323550793177
+  },
+  "tflite_size_mb": 3.508686065673828
+}

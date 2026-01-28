@@ -51,6 +51,13 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.FacePredictor" />
 
+        <!-- Realtime Camera Activity -->
+        <activity
+            android:name=".ui.camera.RealtimeCameraActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.FacePredictor" />
+
         <!-- Prediction Result Activity -->
         <activity
             android:name=".ui.prediction.PredictionResultActivity"
@@ -66,6 +73,12 @@
         <!-- Model Info Activity -->
         <activity
             android:name=".ui.main.ModelInfoActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FacePredictor" />
+
+        <!-- Logs Activity -->
+        <activity
+            android:name=".ui.main.LogsActivity"
             android:exported="false"
             android:theme="@style/Theme.FacePredictor" />
 

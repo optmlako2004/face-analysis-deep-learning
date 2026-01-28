@@ -1,5 +1,6 @@
 {
-  "version": "2.0",
+  "version": "3.0",
+  "backbone": "MobileNetV3Small",
   "img_size": 128,
   "num_classes": 5,
   "classes": [
@@ -21,21 +22,18 @@
     255
   ],
   "confidence_threshold": 0.35,
-  "improvements": [
+  "features": [
+    "MobileNetV3Small backbone",
     "5 classes avec Others",
     "Syst\u00e8me de confiance",
-    "Rotation agressive (\u00b145\u00b0)",
     "Focal Loss",
-    "Oversampling",
     "Mixup",
-    "Label Smoothing",
-    "SE Attention",
-    "AdamW + L2 regularization"
+    "SE Attention"
   ],
   "metrics": {
-    "accuracy_simple": 0.26571067060312104,
-    "accuracy_with_confidence": 0.21720792914382117,
-    "f1_macro_simple": 0.26551206916334885,
-    "f1_macro_with_confidence": 0.23820957670204873
+    "accuracy_simple": 0.4213412062420919,
+    "accuracy_with_confidence": 0.3247574862927035,
+    "f1_macro_simple": 0.412759746860304,
+    "f1_macro_with_confidence": 0.34660033120797074
   }
 }
