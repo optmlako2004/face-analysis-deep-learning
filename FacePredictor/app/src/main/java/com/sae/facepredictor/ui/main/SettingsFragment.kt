@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.sae.facepredictor.R
 import com.sae.facepredictor.databinding.FragmentSettingsBinding
 import com.sae.facepredictor.utils.LogCapture
 import com.sae.facepredictor.utils.PredictionMode
@@ -44,26 +43,35 @@ class SettingsFragment : Fragment() {
 
     private fun setupModelSwitch() {
         // Initialize radio button state from preferences
-        val currentMode = sessionManager.predictionMode
-        when (currentMode) {
+        selectMode(sessionManager.predictionMode)
+
+        // Handle radio button changes manually (RadioGroup doesn't manage nested RadioButtons)
+        binding.radioHybrid.setOnClickListener { selectMode(PredictionMode.HYBRID) }
+        binding.radioOriented.setOnClickListener { selectMode(PredictionMode.ORIENTED) }
+        binding.radioMultitask.setOnClickListener { selectMode(PredictionMode.MULTITASK) }
+        binding.radioTestMobilenet.setOnClickListener { selectMode(PredictionMode.TEST_MOBILENET) }
+    }
+
+    private fun selectMode(mode: PredictionMode) {
+        // Uncheck all
+        binding.radioHybrid.isChecked = false
+        binding.radioOriented.isChecked = false
+        binding.radioMultitask.isChecked = false
+        binding.radioTestMobilenet.isChecked = false
+
+        // Check the selected one
+        when (mode) {
             PredictionMode.HYBRID -> binding.radioHybrid.isChecked = true
             PredictionMode.ORIENTED -> binding.radioOriented.isChecked = true
             PredictionMode.MULTITASK -> binding.radioMultitask.isChecked = true
             PredictionMode.TEST_MOBILENET -> binding.radioTestMobilenet.isChecked = true
         }
 
-        // Handle radio button changes
-        binding.radioGroupMode.setOnCheckedChangeListener { _, checkedId ->
-            val newMode = when (checkedId) {
-                R.id.radioHybrid -> PredictionMode.HYBRID
-                R.id.radioOriented -> PredictionMode.ORIENTED
-                R.id.radioMultitask -> PredictionMode.MULTITASK
-                R.id.radioTestMobilenet -> PredictionMode.TEST_MOBILENET
-                else -> PredictionMode.HYBRID
-            }
-            sessionManager.predictionMode = newMode
-            LogCapture.i(TAG, "Model mode changed: ${newMode.label}")
-            requireContext().showToast("Mode ${newMode.label} activé")
+        // Save preference
+        if (sessionManager.predictionMode != mode) {
+            sessionManager.predictionMode = mode
+            LogCapture.i(TAG, "Model mode changed: ${mode.label}")
+            requireContext().showToast("Mode ${mode.label} activé")
         }
     }
 

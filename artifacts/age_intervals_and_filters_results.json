@@ -1,0 +1,42 @@
+{
+  "experiment": "Age Classification with Intervals + CNN Filter Visualization",
+  "age_intervals": {
+    "bins": [
+      0,
+      3,
+      12,
+      20,
+      35,
+      50,
+      65,
+      120
+    ],
+    "labels": [
+      "B\u00e9b\u00e9 (0-2)",
+      "Enfant (3-11)",
+      "Ado (12-19)",
+      "Jeune adulte (20-34)",
+      "Adulte (35-49)",
+      "Senior (50-64)",
+      "\u00c2g\u00e9 (65+)"
+    ],
+    "num_classes": 7
+  },
+  "metrics": {
+    "age_accuracy": 0.5765867418899859,
+    "age_f1_macro": 0.5148087987457536,
+    "gender_accuracy": 0.8485190409026798,
+    "ethnicity_accuracy": 0.646262341325811
+  },
+  "cnn_insights": {
+    "layer1": "Edge detection, basic colors, gradients",
+    "layer2_3": "Textures, patterns, simple shapes",
+    "middle_layers": "Face parts (eyes, nose, mouth), contours",
+    "deep_layers": "Abstract face representations, identity features"
+  },
+  "gradcam_focus": {
+    "age": "Wrinkles, skin texture, eye area, face contours",
+    "gender": "Jaw shape, eyebrows, cheekbones, overall structure",
+    "ethnicity": "Skin tone, eye shape, nose shape, bone structure"
+  }
+}

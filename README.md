@@ -62,12 +62,40 @@ Des modeles MobileNetV3 ont ete testes mais non retenus pour la version finale e
 
 | Mode              | Description                                | Modeles utilises                           |
 | ----------------- | ------------------------------------------ | ------------------------------------------ |
-| **Hybride** (recommande) | Combine le meilleur de chaque modele | Gender V2 + Age V2 + Multitask V4 (eth)   |
+| **Hybride** (recommande) | Combine le meilleur de chaque modele + Ensemble & TTA | Gender V2 (CLAHE) + Age Ensemble V2+V4 (TTA) + Ethnicity V4 (TTA) |
 | **Oriente V2**    | 3 modeles specialises independants         | Gender V2, Age V2, Ethnicity V2            |
 | **Multitache V4** | 1 modele unifie pour les 3 taches          | multitask_model (EfficientNet V4)          |
 | **Test MobileNet**| Test de performance MobileNetV3            | Gender V3, Age V3, Ethnicity V3 MobileNet  |
 
+### Technique Ensemble + TTA (Mode Hybride)
+
+Le mode Hybride utilise deux techniques d'inference avancees pour ameliorer la precision **sans re-entrainement** :
+
+**Ensemble** : Moyenne des predictions de deux modeles (V2 specialise + V4 multitache) pour reduire les erreurs individuelles.
+
+**TTA (Test Time Augmentation)** : Chaque image est predite 2 fois (originale + flip horizontal), puis les resultats sont moyennes. Cela reduit la sensibilite a l'orientation du visage.
+
+Pour l'age, 4 predictions sont moyennees :
+```
+Age final = (Age_V2 + Age_V2_flip + Age_V4 + Age_V4_flip) / 4
+```
+
+Pour l'ethnicite, les softmax de V4 sont moyennes :
+```
+Ethnicity = argmax( (probs_V4 + probs_V4_flip) / 2 )
+```
+
+**Resultats** : MAE Age reduit de 7.57 a **6.71 ans** (-11.4%) sans aucun re-entrainement.
+
 ### Performances des Modeles
+
+#### Comparaison des 3 Modes EfficientNet (200 images UTKFace)
+
+| Metrique          | Hybride (Ensemble+TTA) | Oriente V2   | Multitache V4 |
+| ----------------- | ---------------------- | ------------ | ------------- |
+| Genre Accuracy    | **91.5%**              | 91.5%        | 81.0%         |
+| Age MAE           | **6.7 ans**            | 7.6 ans      | 7.2 ans       |
+| Ethnicite Acc     | **62.5%**              | 30.5%        | 62.5%         |
 
 #### Comparaison EfficientNet vs MobileNet (Multitask)
 
@@ -89,7 +117,7 @@ Des modeles MobileNetV3 ont ete testes mais non retenus pour la version finale e
 | Age V2         | MAE        | ~6 ans    |
 | Ethnicity V2   | Accuracy   | ~70%      |
 
-**Recommandation** : Le mode **Hybride** est recommande pour le meilleur equilibre precision/performance.
+**Recommandation** : Le mode **Hybride** est recommande pour le meilleur equilibre precision/performance grace a l'Ensemble + TTA.
 
 ---
 
@@ -230,13 +258,16 @@ SAE/
 
 L'application utilise **MediaPipe Face Detection** (~15-30ms sur mobile).
 
+En mode temps reel, un **guide ovale** est affiche pour aider l'utilisateur a positionner son visage. Lorsqu'un visage est detecte, le guide disparait et un rectangle vert entoure le visage.
+
 ```
-SANS detection :                    AVEC detection :
+Pas de visage detecte :            Visage detecte :
 +----------------+                  +----------------+
-|                |                  |    +------+    |
-|      Person    |  --> Erreur     |    | Face |    |  --> OK
-|     /|\        |                  |    +------+    |
-|     / \        |                  |                |
+|  ############  |                  |                |
+|  ##  +----+  ##|                  |   +--------+  |
+|  ##  |    |  ##|  Guide ovale    |   | Visage |  |  Rectangle vert
+|  ##  +----+  ##|                  |   +--------+  |
+|  ############  |                  |                |
 +----------------+                  +----------------+
 ```
 
@@ -248,7 +279,10 @@ SANS detection :                    AVEC detection :
 R: MobileNetV3 a ete teste mais les performances de prediction sont significativement inferieures (-5% ethnicite, +1.2 ans MAE age). EfficientNetB0 offre un meilleur equilibre precision/taille pour le mobile.
 
 **Q: Quel mode de prediction choisir ?**
-R: Le mode **Hybride** est recommande (meilleur equilibre). Il combine le genre V2, l'age V2 et l'ethnicite du multitache V4.
+R: Le mode **Hybride** est recommande (meilleur equilibre). Il combine le genre V2 (CLAHE), l'age par Ensemble V2+V4 avec TTA, et l'ethnicite du multitache V4 avec TTA.
+
+**Q: Qu'est-ce que l'Ensemble + TTA ?**
+R: L'Ensemble moyenne les predictions de deux modeles differents (V2 + V4) pour reduire les erreurs. Le TTA (Test Time Augmentation) predit sur l'image originale et son miroir horizontal, puis moyenne les resultats. Cela ameliore la MAE age de 7.57 a 6.71 ans sans re-entrainement.
 
 **Q: Pourquoi garder le mode Test MobileNet ?**
 R: Pour montrer la demarche de test et comparaison des architectures. Les modeles MobileNetV3 sont accessibles dans les parametres a titre experimental.
@@ -267,11 +301,13 @@ R: Utilisez des photos de bonne qualite, visage de face, eclairage uniforme.
 | ------------------------------------------- | --------- |
 | Application Android complete                | Fait      |
 | Modeles EfficientNetB0 (4 fichiers TFLite)  | Fait      |
+| Ensemble + TTA (amelioration age -11.4%)    | Fait      |
 | Test MobileNetV3 (comparaison)              | Fait      |
 | Detection visage (MediaPipe)                | Fait      |
+| Guide visuel temps reel (ovale)             | Fait      |
 | Authentification Firebase                   | Fait      |
 | Prediction temps reel                       | Fait      |
-| Historique des predictions                  | Fait      |
+| Historique des predictions (Firestore)      | Fait      |
 | 4 modes de prediction                       | Fait      |
 | Gestion compte RGPD                         | Fait      |
 | Comparaison MobileNet vs EfficientNet       | Fait      |
@@ -280,5 +316,5 @@ R: Utilisez des photos de bonne qualite, visage de face, eclairage uniforme.
 
 ---
 
-_Projet SAE BUT3 Informatique - Janvier 2026_
+_Projet SAE BUT3 Informatique - Fevrier 2026_
 _Encadrement: Bilal Faye & Hanane Azzag (LIPN, CNRS UMR 7030, Universite Sorbonne Paris Nord)_

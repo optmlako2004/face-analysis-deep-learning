@@ -1,0 +1,49 @@
+{
+  "model_type": "mobilenet_multitask",
+  "version": "1.0",
+  "backbone": "MobileNetV3Large",
+  "img_size": 128,
+  "input_range": [
+    0,
+    255
+  ],
+  "transfer_learning": {
+    "pretrained_on": "ImageNet",
+    "backbone_frozen_initially": true,
+    "fine_tuned_layers": 50
+  },
+  "outputs": {
+    "age": {
+      "type": "regression",
+      "output_name": "age_output"
+    },
+    "gender": {
+      "type": "binary_classification",
+      "output_name": "gender_output",
+      "classes": [
+        "Male",
+        "Female"
+      ],
+      "threshold": 0.5
+    },
+    "ethnicity": {
+      "type": "multiclass_classification",
+      "output_name": "ethnicity_output",
+      "classes": [
+        "White",
+        "Black",
+        "Asian",
+        "Indian",
+        "Others"
+      ]
+    }
+  },
+  "metrics": {
+    "age_mae": 6.4678778648376465,
+    "age_rmse": 9.201828956604004,
+    "gender_accuracy": 0.8358251057827927,
+    "gender_f1": 0.8185785536159601,
+    "ethnicity_accuracy": 0.6245416078984485,
+    "ethnicity_f1_macro": 0.5605490478140922
+  }
+}

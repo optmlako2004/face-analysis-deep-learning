@@ -1,0 +1,29 @@
+{
+  "experiment": "Grayscale vs RGB for Gender/Age prediction",
+  "hypothesis": "Color information is not discriminative for gender and age prediction",
+  "dataset": "UTKFace",
+  "model_architecture": "MobileNetV3Small + Custom heads",
+  "image_size": 128,
+  "epochs": 25,
+  "results": {
+    "rgb": {
+      "age_mae": 8.751382827758789,
+      "age_rmse": 11.854254722595215,
+      "gender_accuracy": 0.8059785673998872,
+      "gender_f1": 0.765507839127471,
+      "input_size": "128x128x3"
+    },
+    "grayscale": {
+      "age_mae": 10.832093238830566,
+      "age_rmse": 14.22813892364502,
+      "gender_accuracy": 0.7735476593344613,
+      "gender_f1": 0.7748808522567985,
+      "input_size": "128x128x1"
+    }
+  },
+  "conclusion": {
+    "better_for_age": "RGB",
+    "better_for_gender": "RGB",
+    "data_reduction": "67%"
+  }
+}
