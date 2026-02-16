@@ -22,7 +22,8 @@ import com.sae.facepredictor.databinding.ActivityPredictionResultBinding
 import com.sae.facepredictor.ml.FaceDetectorHelper
 import com.sae.facepredictor.ml.FacePredictorHybrid
 import com.sae.facepredictor.ml.FacePredictorMobileNet
-import com.sae.facepredictor.ml.FacePredictorMultitaskMobileNet
+import com.sae.facepredictor.ml.FacePredictorModel
+import com.sae.facepredictor.ml.FacePredictorModelV2
 import com.sae.facepredictor.utils.LogCapture
 import com.sae.facepredictor.utils.PredictionMode
 import com.sae.facepredictor.utils.SessionManager
@@ -42,10 +43,11 @@ class PredictionResultActivity : AppCompatActivity() {
     private lateinit var firestoreRepository: FirestoreRepository
     private lateinit var sessionManager: SessionManager
 
-    // Support for all 3 model types (MobileNet)
-    private var predictorMobileNet: FacePredictorMobileNet? = null
-    private var predictorMultitaskMobileNet: FacePredictorMultitaskMobileNet? = null
+    // Support for all model types
+    private var predictorV2: FacePredictorModelV2? = null
+    private var predictorV4: FacePredictorModel? = null
     private var predictorHybrid: FacePredictorHybrid? = null
+    private var predictorTestMobileNet: FacePredictorMobileNet? = null
     private var predictionMode: PredictionMode = PredictionMode.HYBRID
     private var faceDetector: FaceDetectorHelper? = null
 
@@ -142,15 +144,19 @@ class PredictionResultActivity : AppCompatActivity() {
                 when (predictionMode) {
                     PredictionMode.HYBRID -> {
                         predictorHybrid = FacePredictorHybrid(this@PredictionResultActivity)
-                        LogCapture.d(TAG, "Predictor HYBRID initialized (MobileNet)")
+                        LogCapture.d(TAG, "Predictor HYBRID initialized (EfficientNet)")
                     }
                     PredictionMode.ORIENTED -> {
-                        predictorMobileNet = FacePredictorMobileNet(this@PredictionResultActivity)
-                        LogCapture.d(TAG, "Predictor MobileNet V3 initialized (3 separate models)")
+                        predictorV2 = FacePredictorModelV2(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor V2 initialized (3 separate EfficientNet models)")
                     }
                     PredictionMode.MULTITASK -> {
-                        predictorMultitaskMobileNet = FacePredictorMultitaskMobileNet(this@PredictionResultActivity)
-                        LogCapture.d(TAG, "Predictor Multitask MobileNet V5 initialized (1 unified model)")
+                        predictorV4 = FacePredictorModel(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor V4 Multitask initialized (1 unified EfficientNet model)")
+                    }
+                    PredictionMode.TEST_MOBILENET -> {
+                        predictorTestMobileNet = FacePredictorMobileNet(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor Test MobileNet initialized (3 MobileNet V3 models)")
                     }
                 }
             }
@@ -228,8 +234,9 @@ class PredictionResultActivity : AppCompatActivity() {
                 try {
                     when (predictionMode) {
                         PredictionMode.HYBRID -> predictorHybrid?.predict(faceBitmap)
-                        PredictionMode.ORIENTED -> predictorMobileNet?.predict(faceBitmap)
-                        PredictionMode.MULTITASK -> predictorMultitaskMobileNet?.predict(faceBitmap)
+                        PredictionMode.ORIENTED -> predictorV2?.predict(faceBitmap)
+                        PredictionMode.MULTITASK -> predictorV4?.predict(faceBitmap)
+                        PredictionMode.TEST_MOBILENET -> predictorTestMobileNet?.predict(faceBitmap)
                     }
                 } catch (e: Exception) {
                     LogCapture.e(TAG, "Prediction exception: ${e.message}", e)
@@ -448,9 +455,10 @@ class PredictionResultActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        predictorMobileNet?.close()
-        predictorMultitaskMobileNet?.close()
+        predictorV2?.close()
+        predictorV4?.close()
         predictorHybrid?.close()
+        predictorTestMobileNet?.close()
         faceDetector?.close()
     }
 }

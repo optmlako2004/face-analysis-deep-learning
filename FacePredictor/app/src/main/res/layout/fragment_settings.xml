@@ -88,7 +88,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Recommandé - Combine les meilleurs modèles"
+                            android:text="Recommandé - Combine le meilleur des deux modèles"
                             android:textColor="@color/success"
                             android:textSize="@dimen/text_size_small" />
 
@@ -102,7 +102,7 @@
                     android:background="@color/divider"
                     android:layout_marginVertical="@dimen/margin_small" />
 
-                <!-- MobileNet V3 Mode -->
+                <!-- Oriented V2 Mode -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -125,7 +125,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="MobileNet V3"
+                            android:text="Orienté V2"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold" />
@@ -133,7 +133,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3 modèles légers et rapides"
+                            android:text="3 modèles spécialisés EfficientNet"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_small" />
 
@@ -147,7 +147,7 @@
                     android:background="@color/divider"
                     android:layout_marginVertical="@dimen/margin_small" />
 
-                <!-- Multitask V5 Mode -->
+                <!-- Multitask V4 Mode -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -170,7 +170,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Multitâche V5"
+                            android:text="Multitâche V4"
                             android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold" />
@@ -178,7 +178,52 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1 modèle unifié MobileNet"
+                            android:text="1 modèle unifié EfficientNet"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/divider"
+                    android:layout_marginVertical="@dimen/margin_small" />
+
+                <!-- Test MobileNet Mode -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="@dimen/margin_small">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radioTestMobilenet"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="@dimen/margin_small">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Test MobileNet"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MobileNet V3 - Test de performance"
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_small" />
 

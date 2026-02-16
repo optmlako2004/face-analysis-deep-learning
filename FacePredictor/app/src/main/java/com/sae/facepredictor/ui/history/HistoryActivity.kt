@@ -66,10 +66,17 @@ class HistoryActivity : AppCompatActivity() {
         val userId = authService.userId ?: return
 
         lifecycleScope.launch {
-            firestoreRepository.getPredictionsByUser(userId)
-                .collectLatest { predictions ->
-                    updateUI(predictions)
-                }
+            try {
+                firestoreRepository.getPredictionsByUser(userId)
+                    .collectLatest { predictions ->
+                        updateUI(predictions)
+                    }
+            } catch (e: Exception) {
+                binding.progressBar.visibility = View.GONE
+                binding.emptyState.visibility = View.VISIBLE
+                binding.rvHistory.visibility = View.GONE
+                showToast("Erreur de chargement de l'historique")
+            }
         }
     }
 

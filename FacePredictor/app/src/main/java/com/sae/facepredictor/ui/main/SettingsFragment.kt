@@ -49,6 +49,7 @@ class SettingsFragment : Fragment() {
             PredictionMode.HYBRID -> binding.radioHybrid.isChecked = true
             PredictionMode.ORIENTED -> binding.radioOriented.isChecked = true
             PredictionMode.MULTITASK -> binding.radioMultitask.isChecked = true
+            PredictionMode.TEST_MOBILENET -> binding.radioTestMobilenet.isChecked = true
         }
 
         // Handle radio button changes
@@ -57,6 +58,7 @@ class SettingsFragment : Fragment() {
                 R.id.radioHybrid -> PredictionMode.HYBRID
                 R.id.radioOriented -> PredictionMode.ORIENTED
                 R.id.radioMultitask -> PredictionMode.MULTITASK
+                R.id.radioTestMobilenet -> PredictionMode.TEST_MOBILENET
                 else -> PredictionMode.HYBRID
             }
             sessionManager.predictionMode = newMode

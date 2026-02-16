@@ -20,7 +20,8 @@ import com.sae.facepredictor.databinding.ActivityRealtimeCameraBinding
 import com.sae.facepredictor.ml.FaceDetectorHelper
 import com.sae.facepredictor.ml.FacePredictorHybrid
 import com.sae.facepredictor.ml.FacePredictorMobileNet
-import com.sae.facepredictor.ml.FacePredictorMultitaskMobileNet
+import com.sae.facepredictor.ml.FacePredictorModel
+import com.sae.facepredictor.ml.FacePredictorModelV2
 import com.sae.facepredictor.ui.prediction.PredictionResultActivity
 import com.sae.facepredictor.utils.LogCapture
 import com.sae.facepredictor.utils.PredictionMode
@@ -56,11 +57,12 @@ class RealtimeCameraActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private var isFrontCamera = true
 
-    // Face detection & prediction (MobileNet models)
+    // Face detection & prediction
     private var faceDetector: FaceDetectorHelper? = null
     private var predictorHybrid: FacePredictorHybrid? = null
-    private var predictorMobileNet: FacePredictorMobileNet? = null
-    private var predictorMultitaskMobileNet: FacePredictorMultitaskMobileNet? = null
+    private var predictorV2: FacePredictorModelV2? = null
+    private var predictorV4: FacePredictorModel? = null
+    private var predictorTestMobileNet: FacePredictorMobileNet? = null
 
     // State
     private val isProcessing = AtomicBoolean(false)
@@ -96,12 +98,16 @@ class RealtimeCameraActivity : AppCompatActivity() {
                         LogCapture.i(TAG, "Hybrid predictor initialized")
                     }
                     PredictionMode.ORIENTED -> {
-                        predictorMobileNet = FacePredictorMobileNet(this@RealtimeCameraActivity)
-                        LogCapture.i(TAG, "MobileNet V3 predictor initialized")
+                        predictorV2 = FacePredictorModelV2(this@RealtimeCameraActivity)
+                        LogCapture.i(TAG, "V2 EfficientNet predictor initialized")
                     }
                     PredictionMode.MULTITASK -> {
-                        predictorMultitaskMobileNet = FacePredictorMultitaskMobileNet(this@RealtimeCameraActivity)
-                        LogCapture.i(TAG, "Multitask MobileNet V5 predictor initialized")
+                        predictorV4 = FacePredictorModel(this@RealtimeCameraActivity)
+                        LogCapture.i(TAG, "V4 Multitask EfficientNet predictor initialized")
+                    }
+                    PredictionMode.TEST_MOBILENET -> {
+                        predictorTestMobileNet = FacePredictorMobileNet(this@RealtimeCameraActivity)
+                        LogCapture.i(TAG, "Test MobileNet predictor initialized")
                     }
                 }
 
@@ -260,8 +266,9 @@ class RealtimeCameraActivity : AppCompatActivity() {
     private fun predict(bitmap: Bitmap): PredictionResult? {
         return when (sessionManager.predictionMode) {
             PredictionMode.HYBRID -> predictorHybrid?.predict(bitmap)
-            PredictionMode.ORIENTED -> predictorMobileNet?.predict(bitmap)
-            PredictionMode.MULTITASK -> predictorMultitaskMobileNet?.predict(bitmap)
+            PredictionMode.ORIENTED -> predictorV2?.predict(bitmap)
+            PredictionMode.MULTITASK -> predictorV4?.predict(bitmap)
+            PredictionMode.TEST_MOBILENET -> predictorTestMobileNet?.predict(bitmap)
         }
     }
 
@@ -390,8 +397,9 @@ class RealtimeCameraActivity : AppCompatActivity() {
         cameraExecutor.shutdown()
         faceDetector?.close()
         predictorHybrid?.close()
-        predictorMobileNet?.close()
-        predictorMultitaskMobileNet?.close()
+        predictorV2?.close()
+        predictorV4?.close()
+        predictorTestMobileNet?.close()
         LogCapture.d(TAG, "RealtimeCameraActivity destroyed")
     }
 }
