@@ -2,7 +2,6 @@ package com.sae.facepredictor.ui.camera
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.RectF
 import android.os.Bundle
@@ -19,7 +18,7 @@ import com.sae.facepredictor.data.model.PredictionResult
 import com.sae.facepredictor.databinding.ActivityRealtimeCameraBinding
 import com.sae.facepredictor.ml.FaceDetectorHelper
 import com.sae.facepredictor.ml.FacePredictorHybrid
-import com.sae.facepredictor.ml.FacePredictorMobileNet
+import com.sae.facepredictor.ml.FacePredictorMoE
 import com.sae.facepredictor.ml.FacePredictorModel
 import com.sae.facepredictor.ml.FacePredictorModelV2
 import com.sae.facepredictor.ui.prediction.PredictionResultActivity
@@ -62,7 +61,7 @@ class RealtimeCameraActivity : AppCompatActivity() {
     private var predictorHybrid: FacePredictorHybrid? = null
     private var predictorV2: FacePredictorModelV2? = null
     private var predictorV4: FacePredictorModel? = null
-    private var predictorTestMobileNet: FacePredictorMobileNet? = null
+    private var predictorMoE: FacePredictorMoE? = null
 
     // State
     private val isProcessing = AtomicBoolean(false)
@@ -105,9 +104,9 @@ class RealtimeCameraActivity : AppCompatActivity() {
                         predictorV4 = FacePredictorModel(this@RealtimeCameraActivity)
                         LogCapture.i(TAG, "V4 Multitask EfficientNet predictor initialized")
                     }
-                    PredictionMode.TEST_MOBILENET -> {
-                        predictorTestMobileNet = FacePredictorMobileNet(this@RealtimeCameraActivity)
-                        LogCapture.i(TAG, "Test MobileNet predictor initialized")
+                    PredictionMode.MOE -> {
+                        predictorMoE = FacePredictorMoE(this@RealtimeCameraActivity)
+                        LogCapture.i(TAG, "MoE predictor initialized")
                     }
                 }
 
@@ -246,7 +245,7 @@ class RealtimeCameraActivity : AppCompatActivity() {
             }
 
             // Crop face and predict
-            val croppedFace = faceDetector?.cropFace(bitmap, largestFace, 0.2f) ?: bitmap
+            val croppedFace = faceDetector?.cropFace(bitmap, largestFace, 0.5f) ?: bitmap
             val result = predict(croppedFace)
 
             if (result != null) {
@@ -268,29 +267,21 @@ class RealtimeCameraActivity : AppCompatActivity() {
             PredictionMode.HYBRID -> predictorHybrid?.predict(bitmap)
             PredictionMode.ORIENTED -> predictorV2?.predict(bitmap)
             PredictionMode.MULTITASK -> predictorV4?.predict(bitmap)
-            PredictionMode.TEST_MOBILENET -> predictorTestMobileNet?.predict(bitmap)
+            PredictionMode.MOE -> predictorMoE?.predict(bitmap)
         }
     }
 
     private fun imageProxyToBitmap(imageProxy: ImageProxy): Bitmap? {
         return try {
-            val buffer = imageProxy.planes[0].buffer
-            val bytes = ByteArray(buffer.remaining())
-            buffer.get(bytes)
+            var bitmap = imageProxy.toBitmap()
 
-            var bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return null
-
-            // Apply rotation
             val rotation = imageProxy.imageInfo.rotationDegrees
             if (rotation != 0 || isFrontCamera) {
                 val matrix = Matrix()
                 matrix.postRotate(rotation.toFloat())
-
-                // Mirror for front camera
                 if (isFrontCamera) {
                     matrix.postScale(-1f, 1f, bitmap.width / 2f, bitmap.height / 2f)
                 }
-
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
             }
 
@@ -399,7 +390,7 @@ class RealtimeCameraActivity : AppCompatActivity() {
         predictorHybrid?.close()
         predictorV2?.close()
         predictorV4?.close()
-        predictorTestMobileNet?.close()
+        predictorMoE?.close()
         LogCapture.d(TAG, "RealtimeCameraActivity destroyed")
     }
 }

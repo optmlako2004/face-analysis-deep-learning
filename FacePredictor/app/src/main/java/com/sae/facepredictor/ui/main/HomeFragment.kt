@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sae.facepredictor.R
 import com.sae.facepredictor.data.firebase.FirebaseAuthService
 import com.sae.facepredictor.data.firebase.FirestoreRepository
@@ -42,8 +42,9 @@ class HomeFragment : Fragment() {
 
     private fun setupListeners() {
         binding.btnGetStarted.setOnClickListener {
-            // Navigate to prediction tab
-            findNavController().navigate(R.id.navigation_prediction)
+            // Navigate to prediction tab via bottom navigation to keep back stack in sync
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation)
+                .selectedItemId = R.id.navigation_prediction
         }
 
         binding.cardVideo.setOnClickListener {

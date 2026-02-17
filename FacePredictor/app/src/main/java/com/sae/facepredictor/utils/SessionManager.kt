@@ -7,11 +7,11 @@ enum class PredictionMode(val value: Int, val label: String, val description: St
     ORIENTED(0, "Orienté V2", "3 modèles spécialisés EfficientNet"),
     MULTITASK(1, "Multitâche V4", "1 modèle unifié EfficientNet"),
     HYBRID(2, "Hybride", "Combine le meilleur des deux modèles"),
-    TEST_MOBILENET(3, "Test MobileNet", "MobileNet V3 (test)");
+    MOE(4, "MoE Expert", "Mixture of Experts - MobileNetV3");
 
     companion object {
         fun fromValue(value: Int): PredictionMode {
-            return entries.find { it.value == value } ?: HYBRID
+            return entries.find { it.value == value } ?: MOE
         }
     }
 }
@@ -58,7 +58,7 @@ class SessionManager(context: Context) {
 
     // Prediction mode: ORIENTED, MULTITASK, or HYBRID (default)
     var predictionMode: PredictionMode
-        get() = PredictionMode.fromValue(prefs.getInt(KEY_PREDICTION_MODE, PredictionMode.HYBRID.value))
+        get() = PredictionMode.fromValue(prefs.getInt(KEY_PREDICTION_MODE, PredictionMode.MOE.value))
         set(value) {
             prefs.edit().putInt(KEY_PREDICTION_MODE, value.value).apply()
         }

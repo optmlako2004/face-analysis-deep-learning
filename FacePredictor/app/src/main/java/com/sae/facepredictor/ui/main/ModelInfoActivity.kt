@@ -34,7 +34,7 @@ class ModelInfoActivity : AppCompatActivity() {
             PredictionMode.HYBRID -> displayHybridInfo()
             PredictionMode.MULTITASK -> displayMultitaskInfo()
             PredictionMode.ORIENTED -> displayOrientedV2Info()
-            PredictionMode.TEST_MOBILENET -> displayTestMobileNetInfo()
+            PredictionMode.MOE -> displayMoEInfo()
         }
     }
 
@@ -256,37 +256,46 @@ class ModelInfoActivity : AppCompatActivity() {
         }
     }
 
-    private fun displayTestMobileNetInfo() {
-        binding.tvModelName.text = "Test MobileNet V3"
-        binding.tvModelType.text = "3 Modeles MobileNetV3Small (Test)"
+    private fun displayMoEInfo() {
+        binding.tvModelName.text = "MoE Expert - MobileNetV3"
+        binding.tvModelType.text = "Mixture of Experts (1 modele unifie)"
         binding.tvInputSize.text = "Entree: 128x128x3 pixels (RGB)"
 
         binding.tvGenderMetrics.text = buildString {
-            appendLine("Modele: gender_v3_mobilenet.tflite")
-            appendLine("Type: Classification binaire (MobileNetV3)")
+            appendLine("Modele: moe_mobilenetv3.tflite")
+            appendLine("Type: MoE - 3 experts specialises genre")
+            appendLine("Gating: Reseau de routage adaptatif")
             appendLine("Classes: Homme, Femme")
-            appendLine("Precision: ~84.6%")
+            appendLine("Precision: ~91.2%")
+            appendLine("Homme: 95.0% | Femme: 87.5%")
         }
 
         binding.tvAgeMetrics.text = buildString {
-            appendLine("Modele: age_v3_mobilenet.tflite")
-            appendLine("Type: Regression (MobileNetV3)")
-            appendLine("MAE: ~8 ans")
+            appendLine("Modele: moe_mobilenetv3.tflite")
+            appendLine("Type: MoE - 3 experts specialises age")
+            appendLine("Gating: Reseau de routage adaptatif")
+            appendLine("Sortie: Regression (0-116 ans)")
+            appendLine("MAE: ~5.58 ans")
         }
 
         binding.tvEthnicityMetrics.text = buildString {
-            appendLine("Modele: ethnicity_v3_mobilenet.tflite")
-            appendLine("Type: Classification multi-classe (MobileNetV3)")
+            appendLine("Modele: moe_mobilenetv3.tflite")
+            appendLine("Type: MoE - 3 experts specialises ethnicite")
+            appendLine("Gating: Reseau de routage adaptatif")
             appendLine("Classes: Blanc, Noir, Asiatique, Indien")
-            appendLine("Precision: ~42.1%")
+            appendLine("Precision: ~86.2%")
+            appendLine("Blanc: 95% | Noir: 95% | Asiat.: 75% | Indien: 80%")
         }
 
         binding.tvImprovements.text = buildString {
-            appendLine("- Test de l'architecture MobileNetV3Small")
-            appendLine("- Modeles plus legers (2.6-3.4 MB)")
-            appendLine("- Inference plus rapide (~0.7ms)")
-            appendLine("- Performances inferieures a EfficientNet")
-            appendLine("- Non retenu pour la version finale")
+            appendLine("- Mixture of Experts (MoE) - Recommande")
+            appendLine("- 3 experts par tache (9 experts total)")
+            appendLine("- Gating network adaptatif par tache")
+            appendLine("- Backbone MobileNetV3Small partage")
+            appendLine("- Meilleur sur TOUTES les metriques")
+            appendLine("- 29x plus rapide que le mode Hybride")
+            appendLine("- Modele leger: 6.5 MB")
+            appendLine("- Inference: ~1.8 ms/image")
         }
     }
 

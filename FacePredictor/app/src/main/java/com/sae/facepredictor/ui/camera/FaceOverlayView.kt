@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
@@ -19,18 +18,6 @@ class FaceOverlayView @JvmOverloads constructor(
         color = Color.GREEN
         style = Paint.Style.STROKE
         strokeWidth = 4f
-    }
-
-    private val guidePaint = Paint().apply {
-        color = Color.WHITE
-        style = Paint.Style.STROKE
-        strokeWidth = 3f
-        alpha = 120
-    }
-
-    private val dimPaint = Paint().apply {
-        color = Color.BLACK
-        alpha = 80
     }
 
     private val faces = mutableListOf<RectF>()
@@ -60,37 +47,6 @@ class FaceOverlayView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        if (faces.isEmpty()) {
-            drawGuideOval(canvas)
-        } else {
-            drawDetectedFaces(canvas)
-        }
-    }
-
-    private fun drawGuideOval(canvas: Canvas) {
-        val centerX = width / 2f
-        val centerY = height * 0.38f
-        val ovalWidth = width * 0.55f
-        val ovalHeight = ovalWidth * 1.35f
-
-        val ovalRect = RectF(
-            centerX - ovalWidth / 2,
-            centerY - ovalHeight / 2,
-            centerX + ovalWidth / 2,
-            centerY + ovalHeight / 2
-        )
-
-        // Dim area outside the oval
-        val path = Path()
-        path.addRect(0f, 0f, width.toFloat(), height.toFloat(), Path.Direction.CW)
-        path.addOval(ovalRect, Path.Direction.CCW)
-        canvas.drawPath(path, dimPaint)
-
-        // Draw oval border
-        canvas.drawOval(ovalRect, guidePaint)
-    }
-
-    private fun drawDetectedFaces(canvas: Canvas) {
         val scaleX = width.toFloat() / imageWidth
         val scaleY = height.toFloat() / imageHeight
 

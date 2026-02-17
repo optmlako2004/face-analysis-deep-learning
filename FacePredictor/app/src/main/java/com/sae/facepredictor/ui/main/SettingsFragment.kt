@@ -49,7 +49,7 @@ class SettingsFragment : Fragment() {
         binding.radioHybrid.setOnClickListener { selectMode(PredictionMode.HYBRID) }
         binding.radioOriented.setOnClickListener { selectMode(PredictionMode.ORIENTED) }
         binding.radioMultitask.setOnClickListener { selectMode(PredictionMode.MULTITASK) }
-        binding.radioTestMobilenet.setOnClickListener { selectMode(PredictionMode.TEST_MOBILENET) }
+        binding.radioMoe.setOnClickListener { selectMode(PredictionMode.MOE) }
     }
 
     private fun selectMode(mode: PredictionMode) {
@@ -57,14 +57,14 @@ class SettingsFragment : Fragment() {
         binding.radioHybrid.isChecked = false
         binding.radioOriented.isChecked = false
         binding.radioMultitask.isChecked = false
-        binding.radioTestMobilenet.isChecked = false
+        binding.radioMoe.isChecked = false
 
         // Check the selected one
         when (mode) {
             PredictionMode.HYBRID -> binding.radioHybrid.isChecked = true
             PredictionMode.ORIENTED -> binding.radioOriented.isChecked = true
             PredictionMode.MULTITASK -> binding.radioMultitask.isChecked = true
-            PredictionMode.TEST_MOBILENET -> binding.radioTestMobilenet.isChecked = true
+            PredictionMode.MOE -> binding.radioMoe.isChecked = true
         }
 
         // Save preference

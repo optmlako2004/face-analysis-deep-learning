@@ -21,7 +21,7 @@ import com.sae.facepredictor.ui.camera.RealtimeCameraActivity
 import com.sae.facepredictor.databinding.ActivityPredictionResultBinding
 import com.sae.facepredictor.ml.FaceDetectorHelper
 import com.sae.facepredictor.ml.FacePredictorHybrid
-import com.sae.facepredictor.ml.FacePredictorMobileNet
+import com.sae.facepredictor.ml.FacePredictorMoE
 import com.sae.facepredictor.ml.FacePredictorModel
 import com.sae.facepredictor.ml.FacePredictorModelV2
 import com.sae.facepredictor.utils.LogCapture
@@ -47,7 +47,7 @@ class PredictionResultActivity : AppCompatActivity() {
     private var predictorV2: FacePredictorModelV2? = null
     private var predictorV4: FacePredictorModel? = null
     private var predictorHybrid: FacePredictorHybrid? = null
-    private var predictorTestMobileNet: FacePredictorMobileNet? = null
+    private var predictorMoE: FacePredictorMoE? = null
     private var predictionMode: PredictionMode = PredictionMode.HYBRID
     private var faceDetector: FaceDetectorHelper? = null
 
@@ -154,9 +154,9 @@ class PredictionResultActivity : AppCompatActivity() {
                         predictorV4 = FacePredictorModel(this@PredictionResultActivity)
                         LogCapture.d(TAG, "Predictor V4 Multitask initialized (1 unified EfficientNet model)")
                     }
-                    PredictionMode.TEST_MOBILENET -> {
-                        predictorTestMobileNet = FacePredictorMobileNet(this@PredictionResultActivity)
-                        LogCapture.d(TAG, "Predictor Test MobileNet initialized (3 MobileNet V3 models)")
+                    PredictionMode.MOE -> {
+                        predictorMoE = FacePredictorMoE(this@PredictionResultActivity)
+                        LogCapture.d(TAG, "Predictor MoE initialized (MobileNetV3 Mixture of Experts)")
                     }
                 }
             }
@@ -236,7 +236,7 @@ class PredictionResultActivity : AppCompatActivity() {
                         PredictionMode.HYBRID -> predictorHybrid?.predict(faceBitmap)
                         PredictionMode.ORIENTED -> predictorV2?.predict(faceBitmap)
                         PredictionMode.MULTITASK -> predictorV4?.predict(faceBitmap)
-                        PredictionMode.TEST_MOBILENET -> predictorTestMobileNet?.predict(faceBitmap)
+                        PredictionMode.MOE -> predictorMoE?.predict(faceBitmap)
                     }
                 } catch (e: Exception) {
                     LogCapture.e(TAG, "Prediction exception: ${e.message}", e)
@@ -275,7 +275,7 @@ class PredictionResultActivity : AppCompatActivity() {
 
             if (result.success && result.faces.isNotEmpty()) {
                 val faceRect = result.faces.first()
-                val croppedBitmap = detector.cropFace(bitmap, faceRect, padding = 0.3f)
+                val croppedBitmap = detector.cropFace(bitmap, faceRect, padding = 0.5f)
                 FaceCropResult(croppedBitmap, true, result.faces.size)
             } else {
                 FaceCropResult(null, false, 0)
@@ -458,7 +458,7 @@ class PredictionResultActivity : AppCompatActivity() {
         predictorV2?.close()
         predictorV4?.close()
         predictorHybrid?.close()
-        predictorTestMobileNet?.close()
+        predictorMoE?.close()
         faceDetector?.close()
     }
 }

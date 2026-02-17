@@ -12,6 +12,10 @@ data/
 
 # Modeles Keras (trop volumineux - utiliser les TFLite)
 artifacts/*.keras
+training/output_moe/*.keras
+
+# Modeles TFLite intermediaires (le final est dans assets/)
+training/output_moe/*.tflite
 
 # Modeles TFLite v1 et anciens (exclus)
 artifacts/age_model.tflite
