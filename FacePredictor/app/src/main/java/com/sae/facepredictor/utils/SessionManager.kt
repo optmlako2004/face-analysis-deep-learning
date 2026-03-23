@@ -28,6 +28,7 @@ class SessionManager(context: Context) {
         private const val KEY_EMAIL = "email"
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
         private const val KEY_PREDICTION_MODE = "prediction_mode"
+        private const val KEY_HAS_SEEN_TUTORIAL = "has_seen_tutorial"
     }
 
     fun saveSession(userId: Long, username: String, email: String) {
@@ -41,7 +42,14 @@ class SessionManager(context: Context) {
     }
 
     fun clearSession() {
-        prefs.edit().clear().apply()
+        prefs.edit().apply {
+            remove(KEY_USER_ID)
+            remove(KEY_USERNAME)
+            remove(KEY_EMAIL)
+            remove(KEY_IS_LOGGED_IN)
+            remove(KEY_PREDICTION_MODE)
+            apply()
+        }
     }
 
     val isLoggedIn: Boolean
@@ -62,6 +70,12 @@ class SessionManager(context: Context) {
         set(value) {
             prefs.edit().putInt(KEY_PREDICTION_MODE, value.value).apply()
         }
+
+    fun hasSeenTutorial(userId: String): Boolean =
+        prefs.getBoolean("${KEY_HAS_SEEN_TUTORIAL}_$userId", false)
+
+    fun setHasSeenTutorial(userId: String, value: Boolean) =
+        prefs.edit().putBoolean("${KEY_HAS_SEEN_TUTORIAL}_$userId", value).apply()
 
     // Backward compatibility
     var useMultitaskModel: Boolean

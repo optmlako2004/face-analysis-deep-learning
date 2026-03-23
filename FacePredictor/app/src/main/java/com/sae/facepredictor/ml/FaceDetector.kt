@@ -111,6 +111,52 @@ class FaceDetectorHelper(private val context: Context) {
         }
     }
 
+    /**
+     * Crop a square region centered on the face.
+     * Uses max(width, height) of the bbox as the base side length,
+     * then applies padding. Shifts the crop before clipping to keep it square.
+     * Designed for MoE model to match UTKFace training distribution (~80% face).
+     */
+    fun cropFaceSquare(bitmap: Bitmap, faceRect: RectF, padding: Float = 0.15f): Bitmap {
+        val imgW = bitmap.width
+        val imgH = bitmap.height
+
+        // Use the larger side of the bbox as base
+        val bboxW = faceRect.width()
+        val bboxH = faceRect.height()
+        val baseSide = maxOf(bboxW, bboxH)
+
+        // Apply padding to get the full crop side
+        val cropSide = (baseSide * (1f + 2f * padding)).toInt()
+
+        // Center of the face bbox
+        val cx = ((faceRect.left + faceRect.right) / 2f).toInt()
+        val cy = ((faceRect.top + faceRect.bottom) / 2f).toInt()
+
+        // Initial top-left corner
+        var left = cx - cropSide / 2
+        var top = cy - cropSide / 2
+
+        // Shift to stay within image bounds (keep square before clipping)
+        if (left < 0) left = 0
+        if (top < 0) top = 0
+        if (left + cropSide > imgW) left = maxOf(0, imgW - cropSide)
+        if (top + cropSide > imgH) top = maxOf(0, imgH - cropSide)
+
+        // Final clipped dimensions (may be smaller than cropSide if image is tiny)
+        val finalW = minOf(cropSide, imgW - left)
+        val finalH = minOf(cropSide, imgH - top)
+        val finalSide = minOf(finalW, finalH)
+
+        LogCapture.d(TAG, "cropFaceSquare: bbox=${bboxW.toInt()}x${bboxH.toInt()}, cropSide=$cropSide, final=${finalSide}x${finalSide}, at ($left,$top)")
+
+        return if (finalSide > 0) {
+            Bitmap.createBitmap(bitmap, left, top, finalSide, finalSide)
+        } else {
+            bitmap
+        }
+    }
+
     fun close() {
         faceDetector?.close()
         faceDetector = null

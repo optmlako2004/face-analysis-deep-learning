@@ -5,9 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -28,6 +33,7 @@ class AccountFragment : Fragment() {
 
     companion object {
         private const val TAG = "AccountFragment"
+        private const val WEB_CLIENT_ID = "619435245506-8c4uab1pjkddi13tsqj5iohph4mgjl35.apps.googleusercontent.com"
     }
 
     private var _binding: FragmentAccountBinding? = null
@@ -227,29 +233,100 @@ class AccountFragment : Fragment() {
             .setMessage(R.string.account_delete_confirm)
             .setIcon(R.drawable.ic_delete)
             .setPositiveButton("Supprimer") { _, _ ->
-                deleteAccount()
+                if (isGoogleUser) {
+                    reauthenticateWithGoogleAndDelete()
+                } else {
+                    showPasswordForDeletion()
+                }
             }
             .setNegativeButton("Annuler", null)
             .show()
     }
 
-    private fun deleteAccount() {
+    private fun showPasswordForDeletion() {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_delete_account, null)
+
+        val etPassword = dialogView.findViewById<TextInputEditText>(R.id.etPassword)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.account_delete)
+            .setView(dialogView)
+            .setPositiveButton("Supprimer") { _, _ ->
+                val password = etPassword.text.toString()
+                if (password.isEmpty()) {
+                    requireContext().showToast(getString(R.string.error_empty_fields))
+                    return@setPositiveButton
+                }
+                deleteAccountWithPassword(password)
+            }
+            .setNegativeButton("Annuler", null)
+            .show()
+    }
+
+    private fun deleteAccountWithPassword(password: String) {
         val user = FirebaseAuth.getInstance().currentUser ?: return
-        val userId = user.uid
+        val email = user.email ?: return
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Delete user data from Firestore
-                firestoreRepository.clearHistory(userId)
+                val credential = EmailAuthProvider.getCredential(email, password)
+                user.reauthenticate(credential).await()
 
-                // Delete Firebase Auth user
+                firestoreRepository.clearHistory(user.uid)
                 user.delete().await()
 
                 requireContext().showToast(getString(R.string.account_delete_success))
                 LogCapture.i(TAG, "Account deleted successfully")
-
-                // Navigate to login
                 navigateToLogin()
+            } catch (e: Exception) {
+                LogCapture.e(TAG, "Failed to delete account: ${e.message}", e)
+                requireContext().showToast("Erreur: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    private fun reauthenticateWithGoogleAndDelete() {
+        val credentialManager = CredentialManager.create(requireContext())
+
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(true)
+            .setServerClientId(WEB_CLIENT_ID)
+            .build()
+
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = requireActivity()
+                )
+
+                val credential = result.credential
+                if (credential is CustomCredential &&
+                    credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                ) {
+                    val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                    val authCredential = GoogleAuthProvider.getCredential(googleCredential.idToken, null)
+
+                    val user = FirebaseAuth.getInstance().currentUser ?: return@launch
+                    user.reauthenticate(authCredential).await()
+
+                    firestoreRepository.clearHistory(user.uid)
+                    user.delete().await()
+
+                    requireContext().showToast(getString(R.string.account_delete_success))
+                    LogCapture.i(TAG, "Google account deleted successfully")
+                    navigateToLogin()
+                } else {
+                    requireContext().showToast(getString(R.string.account_delete_reauth_error))
+                }
+            } catch (e: GetCredentialException) {
+                LogCapture.e(TAG, "Google re-auth cancelled: ${e.message}", e)
+                requireContext().showToast(getString(R.string.account_delete_reauth_error))
             } catch (e: Exception) {
                 LogCapture.e(TAG, "Failed to delete account: ${e.message}", e)
                 requireContext().showToast("Erreur: ${e.localizedMessage}")

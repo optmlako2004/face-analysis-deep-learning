@@ -114,7 +114,7 @@ class PredictionFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val count = firestoreRepository.countPredictions(userId)
+                val count = firestoreRepository.countPredictions(userId).getOrDefault(0)
                 binding.tvHistoryCount.text = "$count prédictions sauvegardées"
             } catch (e: Exception) {
                 binding.tvHistoryCount.text = "0 prédictions sauvegardées"

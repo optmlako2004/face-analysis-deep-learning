@@ -11,6 +11,7 @@ import com.sae.facepredictor.R
 import com.sae.facepredictor.data.firebase.FirebaseAuthService
 import com.sae.facepredictor.data.firebase.FirestoreRepository
 import com.sae.facepredictor.databinding.FragmentHomeBinding
+import com.sae.facepredictor.utils.showToast
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -48,7 +49,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.cardVideo.setOnClickListener {
-            // TODO: Open video when available
+            requireContext().showToast(getString(R.string.home_video_placeholder))
         }
     }
 
@@ -57,7 +58,7 @@ class HomeFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val count = firestoreRepository.countPredictions(userId)
+                val count = firestoreRepository.countPredictions(userId).getOrDefault(0)
                 binding.tvPredictionCount.text = count.toString()
             } catch (e: Exception) {
                 binding.tvPredictionCount.text = "0"

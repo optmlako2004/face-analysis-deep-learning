@@ -236,7 +236,7 @@ class PredictionResultActivity : AppCompatActivity() {
                         PredictionMode.HYBRID -> predictorHybrid?.predict(faceBitmap)
                         PredictionMode.ORIENTED -> predictorV2?.predict(faceBitmap)
                         PredictionMode.MULTITASK -> predictorV4?.predict(faceBitmap)
-                        PredictionMode.MOE -> predictorMoE?.predict(faceBitmap)
+                        PredictionMode.MOE -> predictorMoE?.predictEnhanced(faceBitmap)
                     }
                 } catch (e: Exception) {
                     LogCapture.e(TAG, "Prediction exception: ${e.message}", e)
@@ -275,7 +275,11 @@ class PredictionResultActivity : AppCompatActivity() {
 
             if (result.success && result.faces.isNotEmpty()) {
                 val faceRect = result.faces.first()
-                val croppedBitmap = detector.cropFace(bitmap, faceRect, padding = 0.5f)
+                val croppedBitmap = if (predictionMode == PredictionMode.MOE) {
+                    detector.cropFaceSquare(bitmap, faceRect, padding = 0.15f)
+                } else {
+                    detector.cropFace(bitmap, faceRect, padding = 0.3f)
+                }
                 FaceCropResult(croppedBitmap, true, result.faces.size)
             } else {
                 FaceCropResult(null, false, 0)

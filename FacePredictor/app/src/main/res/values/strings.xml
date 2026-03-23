@@ -66,6 +66,9 @@
     <string name="account_password_set">Mot de passe défini avec succès</string>
     <string name="account_logout">Déconnexion</string>
     <string name="account_logout_confirm">Voulez-vous vous déconnecter ?</string>
+    <string name="account_delete_enter_password">Entrez votre mot de passe pour confirmer la suppression définitive de votre compte.</string>
+    <string name="account_delete_reauth_google">Veuillez vous ré-authentifier avec Google pour confirmer la suppression.</string>
+    <string name="account_delete_reauth_error">Impossible de vérifier votre identité. Réessayez.</string>
 
     <!-- Settings -->
     <string name="settings_title">Paramètres</string>
@@ -127,6 +130,19 @@
     <string name="realtime_no_face">Positionnez votre visage dans le cadre</string>
     <string name="realtime_capture">Capturer cette prédiction</string>
     <string name="realtime_saving">Sauvegarde...</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_welcome_title">Bienvenue sur FacePredictor</string>
+    <string name="tutorial_welcome_desc">Analysez un visage grâce à l\'intelligence artificielle. Estimez l\'âge, le genre et l\'ethnicité en quelques secondes.</string>
+    <string name="tutorial_modes_title">3 modes de prédiction</string>
+    <string name="tutorial_modes_desc">Photo : prenez une photo avec la caméra.\nTemps réel : analyse en direct via la caméra.\nGalerie : importez une image existante.</string>
+    <string name="tutorial_tips_title">Pour de meilleurs résultats</string>
+    <string name="tutorial_tips_desc">Centrez le visage dans le cadre.\nAssurez un bon éclairage.\nPrivilégiez une vue de face.\nUne seule personne par photo.</string>
+    <string name="tutorial_ready_title">Prêt !</string>
+    <string name="tutorial_ready_desc">Choisissez votre modèle d\'IA dans Paramètres, puis lancez votre première analyse.</string>
+    <string name="tutorial_next">Suivant</string>
+    <string name="tutorial_start">Commencer</string>
+    <string name="tutorial_skip">Passer</string>
 
     <!-- Errors -->
     <string name="error_camera_permission">Permission caméra requise</string>
