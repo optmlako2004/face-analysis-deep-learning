@@ -12,10 +12,12 @@ data/
 
 # Modeles Keras (trop volumineux - utiliser les TFLite)
 artifacts/*.keras
-training/output_moe/*.keras
+artifacts/**/*.keras
+artifacts/**/*.h5
 
 # Modeles TFLite intermediaires (le final est dans assets/)
-training/output_moe/*.tflite
+artifacts/moe_mobilenetv3/*.tflite
+artifacts/**/*.tflite
 
 # Modeles TFLite v1 et anciens (exclus)
 artifacts/age_model.tflite
@@ -29,6 +31,14 @@ artifacts/multitask_v2_model.tflite
 # - artifacts/gender_v2_model.tflite
 # - artifacts/ethnicity_v2_model.tflite
 # - artifacts/multitask_model.tflite (v4)
+!artifacts/age_v2_model.tflite
+!artifacts/gender_v2_model.tflite
+!artifacts/ethnicity_v2_model.tflite
+!artifacts/multitask_model.tflite
+!artifacts/**/age_v2_model.tflite
+!artifacts/**/gender_v2_model.tflite
+!artifacts/**/ethnicity_v2_model.tflite
+!artifacts/**/multitask_model.tflite
 
 # Garder les fichiers JSON et images de visualisation
 # (deja inclus par defaut)

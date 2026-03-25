@@ -1,203 +1,92 @@
-# FacePredictor - Application Mobile Intelligente
-
-## Vue d'Ensemble du Projet
-
-**SAE BUT 3 Informatique - Annee 2025-2026**
-
-Ce projet developpe une **application mobile Android intelligente** capable de predire l'age, le genre et l'ethnicite d'une personne a partir de son visage, en utilisant des modeles de Deep Learning deployes avec TensorFlow Lite. Le modele recommande est une architecture **Mixture of Experts (MoE)** avec backbone MobileNetV3, qui surpasse les modeles EfficientNetB0 sur toutes les metriques tout en etant 29x plus rapide.
-
-### Fonctionnalites de l'Application
-
-| Fonctionnalite        | Description                                                     | Statut |
-| --------------------- | --------------------------------------------------------------- | ------ |
-| Capture camera        | Prendre une photo via la camera                                 | Fait   |
-| Import galerie        | Charger une photo existante                                     | Fait   |
-| Detection de visage   | MediaPipe Face Detection                                        | Fait   |
-| Prediction IA         | Age, Genre, Ethnicite                                           | Fait   |
-| Prediction temps reel | Analyse en streaming video                                      | Fait   |
-| Switch de modele      | 4 modes: MoE Expert, Hybride, Oriente V2, Multitache V4        | Fait   |
-| Authentification      | Firebase Auth (Email + Google Sign-In)                          | Fait   |
-| Historique            | Sauvegarder les predictions (Firestore)                         | Fait   |
-| Gestion compte        | Mot de passe, suppression RGPD                                  | Fait   |
-
----
-
-## Architecture de l'Application
-
-L'application est structuree en **4 onglets** :
-
-| Onglet         | Description                                         |
-| -------------- | --------------------------------------------------- |
-| **Accueil**    | Presentation de l'app, statistiques, video tutoriel |
-| **Prediction** | Camera, Temps reel, Galerie, Historique             |
-| **Parametres** | Selection du mode de prediction, logs de debug      |
-| **Compte**     | Profil, mot de passe, suppression compte (RGPD)     |
-
----
-
-## Modeles de Prediction
-
-### Modele Recommande : Mixture of Experts (MoE)
-
-| Modele                   | Taille | Description                       |
-| ------------------------ | ------ | --------------------------------- |
-| `moe_mobilenetv3.tflite` | 6.5 MB | MoE multi-tache (3 experts/tache) |
-
-Architecture MoE avec backbone **MobileNetV3Small** partage et 3 tetes specialisees (Genre, Age, Ethnicite), chacune composee de 3 experts MLP avec un gating network adaptatif. Entrainement en 2 phases :
-
-1. **Warmup** (25 epochs) : backbone gele, seules les tetes MoE apprennent
-2. **Fine-tuning progressif** (50 epochs) : defreeze progressif (30 → 60 → toutes les couches) avec BatchNorm gele et LR tres faible (2e-5)
-
-Le preprocessing Rescaling `[-1, 1]` est integre directement dans le modele pour garantir la compatibilite avec les poids ImageNet de MobileNetV3.
-
-### Modeles EfficientNetB0 (modes alternatifs)
-
-| Modele                      | Taille  | Description                               |
-| --------------------------- | ------- | ----------------------------------------- |
-| `gender_v2_model.tflite`    | 5.2 MB  | Classification binaire du genre (+ CLAHE) |
-| `age_v2_model.tflite`       | 6.0 MB  | Regression de l'age                       |
-| `ethnicity_v2_model.tflite` | 6.0 MB  | Classification 5 classes                  |
-| `multitask_model.tflite`    | 10.8 MB | Modele unifie 3 taches (V4)               |
-
-### Modes de Prediction
-
-| Mode                          | Description                                           | Modeles utilises                                                   |
-| ----------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------ |
-| **MoE Expert** (recommande)   | Mixture of Experts - meilleur sur toutes les metriques | moe_mobilenetv3 (MobileNetV3 + 9 experts)                         |
-| **Hybride**                   | Combine le meilleur de chaque modele + Ensemble & TTA | Gender V2 (CLAHE) + Age Ensemble V2+V4 (TTA) + Ethnicity V4 (TTA) |
-| **Oriente V2**                | 3 modeles specialises independants                    | Gender V2, Age V2, Ethnicity V2                                    |
-| **Multitache V4**             | 1 modele unifie pour les 3 taches                     | multitask_model (EfficientNet V4)                                  |
-
-### Performances Comparatives (80 images UTKFace equilibrees)
-
-| Mode              | Genre    | Ethnicite | Age MAE    | Temps/image |
-| ----------------- | -------- | --------- | ---------- | ----------- |
-| **MoE Expert**    | **91.2%** | **86.2%** | **5.58 ans** | **1.79 ms** |
-| Hybride           | 83.8%    | 63.7%     | 6.40 ans   | 51.77 ms    |
-| Oriente V2        | 83.8%    | 37.5%     | 7.12 ans   | 29.30 ms    |
-| Multitache V4     | 76.2%    | 66.2%     | 6.55 ans   | 11.42 ms    |
-
-### Detail MoE par Categorie
-
-| Genre  | Accuracy | Ethnicite  | Accuracy |
-| ------ | -------- | ---------- | -------- |
-| Homme  | 95.0%    | Blanc      | 95.0%    |
-| Femme  | 87.5%    | Noir       | 95.0%    |
-|        |          | Asiatique  | 75.0%    |
-|        |          | Indien     | 80.0%    |
-
-**Conclusion** : Le MoE est le meilleur modele sur **toutes les metriques** simultanement (genre, ethnicite, age, vitesse). Il est **29x plus rapide** que le mode Hybride tout en etant plus precis.
-
-### Technique Ensemble + TTA (Mode Hybride)
-
-Le mode Hybride utilise deux techniques d'inference avancees :
-
-**Ensemble** : Moyenne des predictions de deux modeles (V2 specialise + V4 multitache) pour reduire les erreurs individuelles.
-
-**TTA (Test Time Augmentation)** : Chaque image est predite 2 fois (originale + flip horizontal), puis les resultats sont moyennes.
-
-Pour l'age, 4 predictions sont moyennees :
-
-```
-Age final = (Age_V2 + Age_V2_flip + Age_V4 + Age_V4_flip) / 4
-```
-
-Pour l'ethnicite, les softmax de V4 sont moyennes :
-
-```
-Ethnicity = argmax( (probs_V4 + probs_V4_flip) / 2
-```
-
----
-
-## Demarrage Rapide
-
-### Prerequis
-
-- Python 3.10+ (recommande: 3.11 ou 3.12)
-- pip (gestionnaire de paquets Python)
-- Git
-- 8 Go de RAM minimum (16 Go recommande)
-- GPU NVIDIA avec CUDA 12.x (optionnel)
-
-### Installation
-
-```bash
-# Cloner le projet
 git clone https://github.com/VOTRE_USERNAME/SAE.git
-cd SAE
+# FacePredictor — Deep Learning + Android
 
-# Creer et activer l'environnement virtuel
-python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate   # Windows
+Projet SAE (BUT 3 Informatique) : application Android de prediction d'age, de genre et d'ethnicite a partir d'une photo de visage, appuyee par des modeles TensorFlow / TensorFlow Lite (MobileNetV3, EfficientNet, Mixture of Experts).
 
-# Installer les dependances
+## Organisation du depot
+
+```
+face-analysis-deep-learning/
+├── notebooks/
+│   ├── age/                          # Modeles et regression d'age
+│   ├── gender/                       # Classification de genre
+│   ├── ethnicity/                    # Classification d'ethnicite
+│   ├── multitask/                    # Modeles unifies multi-taches
+│   ├── experiments/                  # Comparaisons backbones, viz
+│   └── moe/train_moe.ipynb           # Entrainement MoE MobileNetV3
+├── artifacts/                        # Modeles, metriques, visuels tries par tache/notebook
+│   ├── age/ gender/ ethnicity/ ...   # Artefacts d'entrainement par tache
+│   ├── multitask/ moe/               # Artefacts multi-taches et MoE
+│   └── experiments/<notebook>/{img,results}/
+│                                     # Visuels/JSON generes par chaque notebook d'experiences
+├── artifacts/experiments/tests/img/  # Images de test manuelles
+├── tests/                            # Scripts de tests de prediction
+├── diagnostics/                      # Scripts d'analyse/profiling MoE
+├── FacePredictor/                    # Application Android (Kotlin)
+├── data/                             # Jeux de donnees locaux (non versionnes)
+├── config.py                         # Constantes/chemins communs
+├── requirements.txt
+└── README.md
+```
+
+### Notebooks (reorganises)
+- `notebooks/age/` : construction et regression d'age (V2 EfficientNet, MobileNet V3, baseline).
+- `notebooks/gender/` : classification du genre (V2 EfficientNet, MobileNet V3).
+- `notebooks/ethnicity/` : classification d'ethnicite (V2 EfficientNet, MobileNet V3).
+- `notebooks/multitask/` : modeles multi-taches (versions V2, V3, V4 equilibree, V5 MobileNet, MobileNet multi-tache).
+- `notebooks/experiments/` : comparaison MobileNet vs EfficientNet, RGB vs grayscale, visualisation des intervalles d'age et filtres.
+- `notebooks/moe/train_moe.ipynb` : entrainement complet du modele Mixture of Experts (MobileNetV3 backbone + gating networks).
+
+### Artefacts ML
+- `artifacts/<tache>/` : artefacts d'entrainement par tache (JSON de metriques, PNG de courbes, TFLite/Keras exportes).
+- `artifacts/experiments/<notebook>/img` : visuels produits par chaque notebook d'experiences.
+- `artifacts/experiments/<notebook>/results` : resultats/rapports JSON par notebook d'experiences.
+- `artifacts/experiments/tests/img` : images de test manuelles.
+- `data/` : dossier ignore (ex. `data/UTKFace/`). Deposez ici vos donnees et splits.
+
+## Prise en main Python (entrainement/benchmark)
+1) Creer l'environnement :
+```bash
+cd face-analysis-deep-learning
+python -m venv .venv && source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
-
-# Verifier l'installation
-python -c "import tensorflow as tf; print(f'TensorFlow {tf.__version__}')"
 ```
+2) Placer le dataset UTKFace (ou votre dataset equivalent) dans `data/UTKFace/`.
+3) Lancer un notebook d'entrainement/etude depuis `notebooks/` (Jupyter ou VS Code) ou executer les scripts de test rapides :
+- `python tests/test_all_modes.py` : compare Oriente V2, Multitache V4 et Hybride sur un echantillon equilibre.
+- `python tests/test_hybrid_mode.py` : validation du mode hybride (ensemblage + TTA).
+- `python tests/test_efficientnet_models.py` : verification des modeles EfficientNet.
+- `python tests/test_moe_comparison.py` : comparaison MoE vs autres modes.
 
-### Telecharger le Dataset UTKFace
+Tous les notebooks commencent par une cellule *Bootstrap* qui remet le `cwd` a la racine du projet et importe `config.py` (chemins, assets Android, helper Kaggle). Executer cette premiere cellule avant les suivantes pour eviter les problemes de chemins apres la reorganisation.
 
+## Application Android (Kotlin)
+- Code : `FacePredictor/app/src/main/java/com/sae/facepredictor/` (modules `ui/`, `data/`, `ml/`).
+- Modeles embarques : `FacePredictor/app/src/main/assets/` (MoE + EfficientNet/MobileNet + Face Detection MediaPipe).
+- Firebase : `google-services.json` deja present; verifier vos credentiels et SHA si vous changez d'environnement.
+- Build rapide en ligne de commande :
 ```bash
-mkdir -p data
-pip install kaggle
-kaggle datasets download -d jangedoo/utkface-new
-unzip utkface-new.zip -d data/
+cd FacePredictor
+./gradlew assembleDebug    # APK debug
+./gradlew assembleRelease  # APK release (requiert keystore)
 ```
+- Build/Run via Android Studio : ouvrir `FacePredictor/`, laisser Gradle synchroniser, choisir un appareil/emulateur, puis `Run`.
 
----
+## Modes de prediction exposes dans l'app
+- **MoE Expert (recommande)** : MobileNetV3 + 3 experts par tache; meilleur compromis vitesse/precision.
+- **Hybride** : ensemble genre V2 + age V2 + ethnicite depuis multitache V4 avec TTA.
+- **Oriente V2** : trois modeles specialises separes (genre/age/ethnicite V2).
+- **Multitache V4/V5** : un seul modele unifie pour les trois taches.
 
-## Structure du Projet
+## Ressources complementaires
+- Comparaisons backbones (MobileNet vs EfficientNet), impact RGB/Grayscale, et visualisation des filtres : voir `notebooks/experiments/` + images dans `artifacts/`.
+- Analyse MoE (courbes, matrices, distribution dataset) : `artifacts/moe_mobilenetv3/`.
 
-```
-SAE/
-|-- Notebooks EfficientNet (Production)
-|   |-- (entrainement des modeles V2 et V4)
-|
-|-- Notebooks MobileNetV3 (Test)
-|   |-- age_model_v3_mobilenet.ipynb          # Age MobileNet (test)
-|   |-- gender_model_v3_mobilenet.ipynb       # Genre MobileNet (test)
-|   |-- ethnicity_model_v3_mobilenet.ipynb    # Ethnicite MobileNet (test)
-|   |-- multitask_mobilenet.ipynb             # Multi-tache MobileNet (test)
-|
-|-- Notebooks Experimentation
-|   |-- mobilenet_vs_efficientnet_comparison.ipynb  # Comparaison backbones
-|   |-- grayscale_vs_rgb_experiment.ipynb           # RGB vs Grayscale
-|   |-- age_intervals_and_filter_visualization.ipynb # Visualisation CNN
-|
-|-- training/                                 # Entrainement MoE (recommande)
-|   |-- train_moe.ipynb                       # MoE MobileNetV3 (modele final)
-|   |-- output_moe/                           # Artefacts MoE
-|       |-- moe_mobilenetv3.keras             # Modele Keras final
-|       |-- moe_mobilenetv3.tflite            # Modele TFLite (6.5 MB)
-|       |-- moe_best.keras                    # Meilleur checkpoint Phase 2
-|       |-- moe_warmup_best.keras             # Meilleur checkpoint Warmup
-|       |-- phase1_curves.png                 # Courbes warmup
-|       |-- phase2_curves.png                 # Courbes fine-tuning progressif
-|       |-- confusion_matrices.png            # Matrices de confusion
-|       |-- age_analysis.png                  # Analyse erreur age
-|       |-- dataset_distribution.png          # Distribution du dataset
-|
-|-- artifacts/                                # Modeles et metriques
-|
-|-- data/UTKFace/                             # Dataset (non versionne)
-|
-|-- FacePredictor/                            # Application Android
-|   |-- app/src/main/
-|   |   |-- java/com/sae/facepredictor/
-|   |   |   |-- ml/                           # Predicteurs TFLite
-|   |   |   |-- ui/                           # Fragments et Activities
-|   |   |   |-- data/                         # Firebase Repository
-|   |   |-- assets/                           # Modeles TFLite
-|   |   |-- res/                              # Layouts, strings
-|
-|-- README.md
-|-- requirements.txt
-```
+## Bonnes pratiques
+- Garder `data/` hors du versionning (datasets volumineux/sensibles).
+- Regenerer les assets TFLite apres tout retrain (copier le .tflite dans `FacePredictor/app/src/main/assets/`).
+- Verifier la coherence des dependances : `requirements.txt` pour Python, `build.gradle.kts` pour Android.
 
 ---
 
