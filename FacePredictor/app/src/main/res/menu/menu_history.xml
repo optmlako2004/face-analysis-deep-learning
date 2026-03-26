@@ -6,7 +6,7 @@
         android:id="@+id/action_clear_history"
         android:icon="@drawable/ic_delete"
         android:title="@string/clear_history"
-        app:iconTint="@color/text_on_primary"
+        app:iconTint="@color/text_secondary"
         app:showAsAction="ifRoom" />
 
 </menu>

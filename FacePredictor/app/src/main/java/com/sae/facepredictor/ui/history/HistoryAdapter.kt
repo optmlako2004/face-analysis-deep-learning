@@ -1,5 +1,6 @@
 package com.sae.facepredictor.ui.history
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -26,33 +27,48 @@ class HistoryAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position), position)
     }
 
     inner class ViewHolder(
         private val binding: ItemHistoryBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(prediction: FirestorePrediction) {
-            // Date
+        fun bind(prediction: FirestorePrediction, position: Int) {
             binding.tvDate.text = prediction.createdAtMillis.toFormattedDate()
-
-            // Age chip
             binding.tvAge.text = "${prediction.predictedAge} ans"
-
-            // Gender chip
             binding.tvGender.text = prediction.predictedGender
-
-            // Ethnicity
             binding.tvEthnicity.text = prediction.predictedEthnicity
+            binding.tvCardLabel.text = if (position == 0) "Récent" else "Analyse"
 
-            // Load thumbnail with placeholder to prevent layout jumps
             val file = File(prediction.imagePath)
             binding.ivThumbnail.load(file) {
                 crossfade(true)
                 placeholder(R.drawable.ic_face)
                 error(R.drawable.ic_face)
             }
+
+            val context = binding.root.context
+            val isFemale = prediction.predictedGender.equals("Femme", ignoreCase = true)
+            val genderTextColor = if (isFemale) {
+                context.getColor(R.color.female_color)
+            } else {
+                context.getColor(R.color.male_color)
+            }
+            val genderBackgroundColor = if (isFemale) {
+                context.getColor(R.color.female_background)
+            } else {
+                context.getColor(R.color.male_background)
+            }
+
+            binding.tvGender.setTextColor(genderTextColor)
+            binding.tvGender.backgroundTintList = ColorStateList.valueOf(genderBackgroundColor)
+            binding.tvEthnicity.backgroundTintList = ColorStateList.valueOf(
+                context.getColor(R.color.secondary_container)
+            )
+            binding.tvCardLabel.backgroundTintList = ColorStateList.valueOf(
+                context.getColor(R.color.primary_container)
+            )
 
             binding.btnDelete.setOnClickListener {
                 onDeleteClick(prediction)
