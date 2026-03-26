@@ -1,6 +1,7 @@
 package com.sae.facepredictor
 
 import android.app.Application
+import com.sae.facepredictor.data.firebase.FirebaseAuthService
 
 class FacePredictorApp : Application() {
 
@@ -12,5 +13,6 @@ class FacePredictorApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        FirebaseAuthService.init(this)
     }
 }
