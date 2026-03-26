@@ -4,116 +4,124 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/margin_small"
-    app:cardCornerRadius="@dimen/card_corner_radius"
-    app:cardElevation="@dimen/card_elevation"
-    app:strokeWidth="0dp">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="6dp"
+    android:backgroundTint="@color/card_background"
+    app:cardCornerRadius="28dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/divider"
+    app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/margin_medium">
+        android:padding="14dp">
 
-        <!-- Thumbnail -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardThumbnail"
-            android:layout_width="@dimen/history_thumbnail_size"
-            android:layout_height="@dimen/history_thumbnail_size"
-            app:cardCornerRadius="@dimen/button_corner_radius"
-            app:cardElevation="0dp"
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivThumbnail"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_face"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.ExtraLarge" />
 
-            <ImageView
-                android:id="@+id/ivThumbnail"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:contentDescription="@string/prediction_results" />
+        <TextView
+            android:id="@+id/tvCardLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/bg_pill_light"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="Analyse"
+            android:textColor="@color/primary"
+            android:textSize="@dimen/text_size_small"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/ivThumbnail"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Date -->
         <TextView
             android:id="@+id/tvDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_medium"
-            android:layout_marginEnd="@dimen/margin_small"
-            android:textSize="@dimen/text_size_small"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="24/03/2026 18:42"
             android:textColor="@color/text_tertiary"
-            app:layout_constraintStart_toEndOf="@id/cardThumbnail"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnDelete" />
+            android:textSize="@dimen/text_size_small"
+            app:layout_constraintEnd_toStartOf="@id/btnDelete"
+            app:layout_constraintStart_toEndOf="@id/ivThumbnail"
+            app:layout_constraintTop_toBottomOf="@id/tvCardLabel" />
 
-        <!-- Results Row -->
-        <LinearLayout
-            android:id="@+id/resultsRow"
+        <TextView
+            android:id="@+id/tvAge"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_medium"
-            android:layout_marginTop="@dimen/margin_tiny"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:text="25 ans"
+            android:textColor="@color/text_primary"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/btnDelete"
+            app:layout_constraintStart_toEndOf="@id/ivThumbnail"
+            app:layout_constraintTop_toBottomOf="@id/tvDate" />
+
+        <LinearLayout
+            android:id="@+id/chipsRow"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintStart_toEndOf="@id/cardThumbnail"
-            app:layout_constraintTop_toBottomOf="@id/tvDate"
-            app:layout_constraintEnd_toStartOf="@id/btnDelete">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnDelete"
+            app:layout_constraintStart_toEndOf="@id/ivThumbnail"
+            app:layout_constraintTop_toBottomOf="@id/tvAge">
 
-            <!-- Age Chip -->
-            <TextView
-                android:id="@+id/tvAge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/chip_age"
-                android:paddingHorizontal="@dimen/margin_small"
-                android:paddingVertical="@dimen/margin_tiny"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="@color/age_card_border"
-                android:textStyle="bold"
-                android:layout_marginEnd="@dimen/margin_tiny" />
-
-            <!-- Gender Chip -->
             <TextView
                 android:id="@+id/tvGender"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/chip_gender"
-                android:paddingHorizontal="@dimen/margin_small"
-                android:paddingVertical="@dimen/margin_tiny"
+                android:background="@drawable/bg_pill_light"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:text="Homme"
+                android:textColor="@color/primary"
                 android:textSize="@dimen/text_size_small"
-                android:textColor="@color/gender_card_border"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvEthnicity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_pill_light"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:text="Caucasien"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_small"
                 android:textStyle="bold" />
 
         </LinearLayout>
 
-        <!-- Ethnicity -->
-        <TextView
-            android:id="@+id/tvEthnicity"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_medium"
-            android:layout_marginTop="@dimen/margin_tiny"
-            android:textSize="@dimen/text_size_medium"
-            android:textColor="@color/text_primary"
-            app:layout_constraintStart_toEndOf="@id/cardThumbnail"
-            app:layout_constraintTop_toBottomOf="@id/resultsRow"
-            app:layout_constraintEnd_toStartOf="@id/btnDelete" />
-
-        <!-- Delete Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDelete"
             style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:contentDescription="@string/delete"
+            app:backgroundTint="@color/error_light"
             app:icon="@drawable/ic_delete"
             app:iconTint="@color/error"
-            app:iconSize="20dp"
-            app:rippleColor="@color/error_light"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:contentDescription="@string/delete" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </com.google.android.material.card.MaterialCardView>
