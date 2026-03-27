@@ -7,6 +7,7 @@ import com.sae.facepredictor.data.model.Ethnicity
 import com.sae.facepredictor.data.model.Gender
 import com.sae.facepredictor.data.model.PredictionResult
 import com.sae.facepredictor.utils.LogCapture
+import com.sae.facepredictor.utils.estimateAgeConfidence
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -17,27 +18,23 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * FacePredictorHybrid - Combine le meilleur des deux approches:
- * - Genre: gender_v2_model.tflite (V2 Orienté - meilleur pour le genre)
- * - Age: Ensemble V2 + V4 avec TTA (flip horizontal) pour meilleure précision
- * - Ethnicité: multitask_model.tflite (V4 Multitâche - meilleur pour l'ethnicité)
+ * FacePredictorHybrid - Combine le meilleur de chaque modele specialise:
+ * - Genre: gender_v2_model.tflite (modele specialise EfficientNetB0)
+ * - Age: age_v2_model.tflite avec TTA (flip horizontal)
+ * - Ethnicite: ethnicity_v2_model.tflite (modele specialise EfficientNetB0)
+ *
+ * Tous les modeles sont des EfficientNetB0 re-entraines, input 224x224.
  */
 class FacePredictorHybrid(private val context: Context) {
 
-    // V2 models for gender and age
     private var genderInterpreter: Interpreter? = null
     private var ageInterpreter: Interpreter? = null
-
-    // V4 multitask model for ethnicity
-    private var multitaskInterpreter: Interpreter? = null
+    private var ethnicityInterpreter: Interpreter? = null
 
     private var initError: String? = null
 
-    private val inputSize = 128
+    private val inputSize = 224
     private val genderThreshold = 0.5f
-
-    // Ethnicity classes V4 (4 classes, no Others)
-    private val ethnicityClassesV4 = arrayOf("Blanc", "Noir", "Asiatique", "Indien")
 
     init {
         loadModels()
@@ -49,22 +46,19 @@ class FacePredictorHybrid(private val context: Context) {
                 setNumThreads(4)
             }
 
-            // Load Gender V2 model (best for gender)
             LogCapture.d(TAG, "Loading gender_v2 model for hybrid...")
             genderInterpreter = Interpreter(loadModelFile("gender_v2_model.tflite"), options)
             LogCapture.i(TAG, "Gender V2 model loaded")
 
-            // Load Age V2 model
             LogCapture.d(TAG, "Loading age_v2 model for hybrid...")
             ageInterpreter = Interpreter(loadModelFile("age_v2_model.tflite"), options)
             LogCapture.i(TAG, "Age V2 model loaded")
 
-            // Load Multitask V4 model (best for ethnicity)
-            LogCapture.d(TAG, "Loading multitask_model for hybrid ethnicity...")
-            multitaskInterpreter = Interpreter(loadModelFile("multitask_model.tflite"), options)
-            LogCapture.i(TAG, "Multitask V4 model loaded")
+            LogCapture.d(TAG, "Loading ethnicity_v2 model for hybrid...")
+            ethnicityInterpreter = Interpreter(loadModelFile("ethnicity_v2_model.tflite"), options)
+            LogCapture.i(TAG, "Ethnicity V2 model loaded")
 
-            LogCapture.i(TAG, "Hybrid model loaded successfully (Gender V2 + Age V2 + Ethnicity V4)")
+            LogCapture.i(TAG, "Hybrid model loaded (Genre V2 + Age V2 TTA + Ethnicite V2)")
         } catch (e: Exception) {
             initError = e.message
             LogCapture.e(TAG, "Error loading hybrid models: ${e.message}", e)
@@ -85,94 +79,64 @@ class FacePredictorHybrid(private val context: Context) {
     fun predict(bitmap: Bitmap): PredictionResult? {
         LogCapture.d(TAG, "Starting HYBRID prediction on bitmap ${bitmap.width}x${bitmap.height}")
 
-        if (genderInterpreter == null || ageInterpreter == null || multitaskInterpreter == null) {
+        if (genderInterpreter == null || ageInterpreter == null || ethnicityInterpreter == null) {
             LogCapture.e(TAG, "Models not loaded. Init error: $initError")
             return null
         }
 
         return try {
             val resizedBitmap = Bitmap.createScaledBitmap(bitmap, inputSize, inputSize, true)
-            LogCapture.d(TAG, "Bitmap resized to ${inputSize}x${inputSize}")
 
-            // Prepare input buffers (original)
+            // Prepare input buffers (original + flipped for TTA)
             val inputBuffer = bitmapToByteBuffer(resizedBitmap)
-            val inputBufferCLAHE = bitmapToByteBufferWithCLAHE(resizedBitmap)
-
-            // Prepare flipped input buffer (TTA)
             val flippedBitmap = flipHorizontally(resizedBitmap)
             val inputBufferFlipped = bitmapToByteBuffer(flippedBitmap)
 
-            // === Gender from V2 (best for gender) ===
+            // === Genre from V2 specialise ===
             val genderOutput = Array(1) { FloatArray(1) }
-            inputBufferCLAHE.rewind()
-            genderInterpreter!!.run(inputBufferCLAHE, genderOutput)
+            inputBuffer.rewind()
+            genderInterpreter!!.run(inputBuffer, genderOutput)
 
             val genderProb = genderOutput[0][0]
             val gender = if (genderProb > genderThreshold) Gender.FEMALE else Gender.MALE
             val genderConfidence = if (genderProb > genderThreshold) genderProb else (1f - genderProb)
             LogCapture.d(TAG, "Gender (V2): ${gender.label} (conf: ${genderConfidence * 100}%)")
 
-            // === Age: Ensemble V2 + V4 with TTA (4 predictions averaged) ===
-
-            // Age V2 on original
+            // === Age: V2 avec TTA (original + flipped, moyenne) ===
             val ageOutput = Array(1) { FloatArray(1) }
             inputBuffer.rewind()
             ageInterpreter!!.run(inputBuffer, ageOutput)
-            val ageV2 = ageOutput[0][0]
+            val ageOriginal = ageOutput[0][0]
 
-            // Age V2 on flipped (TTA)
             val ageOutputFlipped = Array(1) { FloatArray(1) }
             inputBufferFlipped.rewind()
             ageInterpreter!!.run(inputBufferFlipped, ageOutputFlipped)
-            val ageV2Flip = ageOutputFlipped[0][0]
+            val ageFlipped = ageOutputFlipped[0][0]
 
-            // V4 Multitask on original (also gives ethnicity)
-            val genderOutV4 = Array(1) { FloatArray(1) }
-            val ageOutV4 = Array(1) { FloatArray(1) }
-            val ethnicityOutV4 = Array(1) { FloatArray(4) }
+            val ageAvg = (ageOriginal + ageFlipped) / 2f
+            val age = ageAvg.toInt().coerceIn(0, 116)
+            LogCapture.d(TAG, "Age TTA: original=${"%.1f".format(ageOriginal)}, flipped=${"%.1f".format(ageFlipped)} => $age ans")
 
-            val outputMap = HashMap<Int, Any>()
-            outputMap[0] = genderOutV4
-            outputMap[1] = ageOutV4
-            outputMap[2] = ethnicityOutV4
-
+            // === Ethnicite: V2 specialise avec TTA ===
+            val ethOutput = Array(1) { FloatArray(5) }
             inputBuffer.rewind()
-            multitaskInterpreter!!.runForMultipleInputsOutputs(arrayOf(inputBuffer), outputMap)
-            val ageV4 = ageOutV4[0][0]
+            ethnicityInterpreter!!.run(inputBuffer, ethOutput)
 
-            // V4 Multitask on flipped (TTA)
-            val genderOutV4Flip = Array(1) { FloatArray(1) }
-            val ageOutV4Flip = Array(1) { FloatArray(1) }
-            val ethnicityOutV4Flip = Array(1) { FloatArray(4) }
-
-            val outputMapFlip = HashMap<Int, Any>()
-            outputMapFlip[0] = genderOutV4Flip
-            outputMapFlip[1] = ageOutV4Flip
-            outputMapFlip[2] = ethnicityOutV4Flip
-
+            val ethOutputFlipped = Array(1) { FloatArray(5) }
             inputBufferFlipped.rewind()
-            multitaskInterpreter!!.runForMultipleInputsOutputs(arrayOf(inputBufferFlipped), outputMapFlip)
-            val ageV4Flip = ageOutV4Flip[0][0]
+            ethnicityInterpreter!!.run(inputBufferFlipped, ethOutputFlipped)
 
-            // Ensemble + TTA: average of 4 predictions
-            val ageEnsemble = (ageV2 + ageV2Flip + ageV4 + ageV4Flip) / 4f
-            val age = ageEnsemble.toInt().coerceIn(0, 116)
-            LogCapture.d(TAG, "Age Ensemble+TTA: V2=${"%.1f".format(ageV2)}, V2flip=${"%.1f".format(ageV2Flip)}, V4=${"%.1f".format(ageV4)}, V4flip=${"%.1f".format(ageV4Flip)} => $age ans")
-
-            // === Ethnicity from V4 Multitask (average original + flipped) ===
-            val ethProbs = ethnicityOutV4[0]
-            val ethProbsFlip = ethnicityOutV4Flip[0]
-            val ethProbsAvg = FloatArray(4) { (ethProbs[it] + ethProbsFlip[it]) / 2f }
+            val ethProbsAvg = FloatArray(5) { (ethOutput[0][it] + ethOutputFlipped[0][it]) / 2f }
             val maxIdx = ethProbsAvg.indices.maxByOrNull { ethProbsAvg[it] } ?: 0
-            val ethnicity = ethnicityFromIndexV4(maxIdx)
+            val ethnicity = ethnicityFromIndex(maxIdx)
             val ethnicityConfidence = ethProbsAvg[maxIdx]
-            LogCapture.d(TAG, "Ethnicity (V4 TTA): ${ethnicity.label} (conf: ${ethnicityConfidence * 100}%)")
+            LogCapture.d(TAG, "Ethnicity TTA: ${ethnicity.label} (conf: ${ethnicityConfidence * 100}%)")
 
             LogCapture.i(TAG, "HYBRID Result: Age=$age, Gender=${gender.label}, Ethnicity=${ethnicity.label}")
 
             PredictionResult(
                 age = age,
-                ageConfidence = 0.85f,
+                ageConfidence = estimateAgeConfidence(age),
                 gender = gender,
                 genderConfidence = genderConfidence,
                 ethnicity = ethnicity,
@@ -190,12 +154,13 @@ class FacePredictorHybrid(private val context: Context) {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
-    private fun ethnicityFromIndexV4(index: Int): Ethnicity {
+    private fun ethnicityFromIndex(index: Int): Ethnicity {
         return when (index) {
             0 -> Ethnicity.WHITE
             1 -> Ethnicity.BLACK
             2 -> Ethnicity.ASIAN
             3 -> Ethnicity.INDIAN
+            4 -> Ethnicity.OTHERS
             else -> Ethnicity.WHITE
         }
     }
@@ -221,53 +186,11 @@ class FacePredictorHybrid(private val context: Context) {
         return byteBuffer
     }
 
-    private fun bitmapToByteBufferWithCLAHE(bitmap: Bitmap): ByteBuffer {
-        val byteBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3)
-        byteBuffer.order(ByteOrder.nativeOrder())
-
-        val pixels = IntArray(inputSize * inputSize)
-        bitmap.getPixels(pixels, 0, inputSize, 0, 0, inputSize, inputSize)
-
-        var minL = 255f
-        var maxL = 0f
-
-        for (pixel in pixels) {
-            val r = ((pixel shr 16) and 0xFF).toFloat()
-            val g = ((pixel shr 8) and 0xFF).toFloat()
-            val b = (pixel and 0xFF).toFloat()
-            val l = 0.299f * r + 0.587f * g + 0.114f * b
-            minL = min(minL, l)
-            maxL = max(maxL, l)
-        }
-
-        val range = maxL - minL
-        val scale = if (range > 0) 255f / range else 1f
-
-        for (pixel in pixels) {
-            var r = ((pixel shr 16) and 0xFF).toFloat()
-            var g = ((pixel shr 8) and 0xFF).toFloat()
-            var b = (pixel and 0xFF).toFloat()
-
-            if (range > 0) {
-                r = ((r - minL) * scale).coerceIn(0f, 255f)
-                g = ((g - minL) * scale).coerceIn(0f, 255f)
-                b = ((b - minL) * scale).coerceIn(0f, 255f)
-            }
-
-            byteBuffer.putFloat(r)
-            byteBuffer.putFloat(g)
-            byteBuffer.putFloat(b)
-        }
-
-        byteBuffer.rewind()
-        return byteBuffer
-    }
-
     fun close() {
         try {
             genderInterpreter?.close()
             ageInterpreter?.close()
-            multitaskInterpreter?.close()
+            ethnicityInterpreter?.close()
             LogCapture.d(TAG, "Hybrid model interpreters closed")
         } catch (e: Exception) {
             LogCapture.e(TAG, "Error closing interpreters", e)

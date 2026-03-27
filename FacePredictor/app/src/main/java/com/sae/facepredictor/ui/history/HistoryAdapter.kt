@@ -39,7 +39,7 @@ class HistoryAdapter(
             binding.tvAge.text = "${prediction.predictedAge} ans"
             binding.tvGender.text = prediction.predictedGender
             binding.tvEthnicity.text = prediction.predictedEthnicity
-            binding.tvCardLabel.text = if (position == 0) "Récent" else "Analyse"
+            // tvCardLabel removed from layout
 
             val file = File(prediction.imagePath)
             binding.ivThumbnail.load(file) {
@@ -66,9 +66,7 @@ class HistoryAdapter(
             binding.tvEthnicity.backgroundTintList = ColorStateList.valueOf(
                 context.getColor(R.color.secondary_container)
             )
-            binding.tvCardLabel.backgroundTintList = ColorStateList.valueOf(
-                context.getColor(R.color.primary_container)
-            )
+            // tvCardLabel removed from layout
 
             binding.btnDelete.setOnClickListener {
                 onDeleteClick(prediction)

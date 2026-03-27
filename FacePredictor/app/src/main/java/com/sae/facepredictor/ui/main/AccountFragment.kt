@@ -5,6 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -19,6 +23,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.sae.facepredictor.R
 import com.sae.facepredictor.data.firebase.FirebaseAuthService
 import com.sae.facepredictor.data.firebase.FirestoreRepository
@@ -28,6 +33,11 @@ import com.sae.facepredictor.utils.LogCapture
 import com.sae.facepredictor.utils.showToast
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import org.json.JSONArray
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class AccountFragment : Fragment() {
 
@@ -60,20 +70,27 @@ class AccountFragment : Fragment() {
         firestoreRepository = FirestoreRepository.getInstance()
 
         setupUserInfo()
+        setupSecurityInfo()
+        setupStats()
         setupListeners()
     }
 
     private fun setupUserInfo() {
         val user = FirebaseAuth.getInstance().currentUser ?: return
 
-        // Name
         val displayName = user.displayName
             ?: user.email?.substringBefore("@")
             ?: "Utilisateur"
         binding.tvUserName.text = displayName
-
-        // Email
         binding.tvUserEmail.text = user.email ?: "Email non disponible"
+
+        // Avatar initials
+        val initials = displayName.split(" ")
+            .take(2)
+            .mapNotNull { it.firstOrNull()?.uppercase() }
+            .joinToString("")
+            .ifEmpty { "?" }
+        binding.tvAvatarInitials.text = initials
 
         // Check if Google user
         isGoogleUser = user.providerData.any { it.providerId == GoogleAuthProvider.PROVIDER_ID }
@@ -90,13 +107,93 @@ class AccountFragment : Fragment() {
         }
     }
 
+    private fun setupSecurityInfo() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val dateFormat = SimpleDateFormat("d MMM yyyy", Locale.FRANCE)
+
+        // Membre depuis
+        user.metadata?.creationTimestamp?.let { ts ->
+            binding.tvMemberSince.text = dateFormat.format(Date(ts))
+        }
+
+        // Derniere connexion
+        user.metadata?.lastSignInTimestamp?.let { ts ->
+            val lastLogin = Date(ts)
+            val now = Date()
+            val diffMs = now.time - lastLogin.time
+            val diffHours = diffMs / (1000 * 60 * 60)
+
+            binding.tvLastLogin.text = when {
+                diffHours < 1 -> "Maintenant"
+                diffHours < 24 -> "Il y a ${diffHours}h"
+                diffHours < 48 -> "Hier"
+                else -> dateFormat.format(lastLogin)
+            }
+        }
+
+        // Email verifie
+        val verified = user.isEmailVerified || isGoogleUser
+        binding.tvEmailVerified.text = if (verified) "Oui" else "Non"
+        binding.tvEmailVerified.setTextColor(
+            resources.getColor(
+                if (verified) R.color.success else R.color.warning,
+                null
+            )
+        )
+
+        // Methodes d'authentification
+        val methods = mutableListOf<String>()
+        user.providerData.forEach { profile ->
+            when (profile.providerId) {
+                GoogleAuthProvider.PROVIDER_ID -> methods.add("Google")
+                EmailAuthProvider.PROVIDER_ID -> methods.add("Email")
+            }
+        }
+        binding.tvAuthMethods.text = methods.distinct().joinToString(" + ")
+    }
+
+    private fun setupStats() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = firestoreRepository.getPredictionsByUserOnce(user.uid)
+                val predictions = result.getOrDefault(emptyList())
+
+                // Total
+                binding.tvStatTotal.text = predictions.size.toString()
+
+                if (predictions.isNotEmpty()) {
+                    // Age moyen
+                    val avgAge = predictions.map { it.predictedAge }.average()
+                    binding.tvStatAvgAge.text = String.format("%.0f", avgAge)
+
+                    // Genre le plus frequent
+                    val genderCounts = predictions.groupingBy { it.predictedGender }.eachCount()
+                    val topGender = genderCounts.maxByOrNull { it.value }?.key ?: "—"
+                    binding.tvStatTopGender.text = when (topGender) {
+                        "MALE" -> "H"
+                        "FEMALE" -> "F"
+                        else -> topGender.take(1)
+                    }
+
+                    // Derniere prediction
+                    val lastPrediction = predictions.firstOrNull()
+                    lastPrediction?.createdAt?.let { ts ->
+                        val dateFormat = SimpleDateFormat("d MMM yyyy, HH:mm", Locale.FRANCE)
+                        binding.tvStatLastPrediction.text =
+                            getString(R.string.account_stats_last, dateFormat.format(ts.toDate()))
+                    }
+                }
+            } catch (e: Exception) {
+                LogCapture.e(TAG, "Failed to load stats: ${e.message}", e)
+            }
+        }
+    }
+
     private fun setupListeners() {
         binding.cardChangePassword.setOnClickListener {
-            if (isGoogleUser) {
-                showSetPasswordDialog()
-            } else {
-                showChangePasswordDialog()
-            }
+            if (isGoogleUser) showSetPasswordDialog() else showChangePasswordDialog()
         }
 
         binding.cardDeleteAccount.setOnClickListener {
@@ -106,15 +203,127 @@ class AccountFragment : Fragment() {
         binding.btnLogout.setOnClickListener {
             showLogoutConfirmation()
         }
+
+        binding.btnEditName.setOnClickListener {
+            showEditNameDialog()
+        }
+
+        binding.cardExportData.setOnClickListener {
+            exportData()
+        }
+    }
+
+    private fun showEditNameDialog() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val currentName = user.displayName ?: ""
+
+        val inputLayout = TextInputLayout(requireContext()).apply {
+            setPadding(50, 20, 50, 0)
+            hint = getString(R.string.account_edit_name_hint)
+        }
+        val editText = TextInputEditText(inputLayout.context).apply {
+            setText(currentName)
+        }
+        inputLayout.addView(editText)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.account_edit_name)
+            .setView(inputLayout)
+            .setPositiveButton("Enregistrer") { _, _ ->
+                val newName = editText.text.toString().trim()
+                if (newName.isNotEmpty() && newName != currentName) {
+                    updateDisplayName(newName)
+                }
+            }
+            .setNegativeButton("Annuler", null)
+            .show()
+    }
+
+    private fun updateDisplayName(newName: String) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val profileUpdates = UserProfileChangeRequest.Builder()
+                    .setDisplayName(newName)
+                    .build()
+                user.updateProfile(profileUpdates).await()
+
+                binding.tvUserName.text = newName
+                val initials = newName.split(" ")
+                    .take(2)
+                    .mapNotNull { it.firstOrNull()?.uppercase() }
+                    .joinToString("")
+                    .ifEmpty { "?" }
+                binding.tvAvatarInitials.text = initials
+
+                requireContext().showToast(getString(R.string.account_name_updated))
+                LogCapture.i(TAG, "Display name updated to: $newName")
+            } catch (e: Exception) {
+                LogCapture.e(TAG, "Failed to update name: ${e.message}", e)
+                requireContext().showToast("Erreur: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    private fun exportData() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val result = firestoreRepository.getPredictionsByUserOnce(user.uid)
+                val predictions = result.getOrDefault(emptyList())
+
+                if (predictions.isEmpty()) {
+                    requireContext().showToast(getString(R.string.account_export_empty))
+                    return@launch
+                }
+
+                val jsonArray = JSONArray()
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.FRANCE)
+
+                predictions.forEach { p ->
+                    val obj = JSONObject().apply {
+                        put("age", p.predictedAge)
+                        put("age_confidence", p.ageConfidence)
+                        put("gender", p.predictedGender)
+                        put("gender_confidence", p.genderConfidence)
+                        put("ethnicity", p.predictedEthnicity)
+                        put("ethnicity_confidence", p.ethnicityConfidence)
+                        p.createdAt?.let {
+                            put("date", dateFormat.format(it.toDate()))
+                        }
+                    }
+                    jsonArray.put(obj)
+                }
+
+                val exportJson = JSONObject().apply {
+                    put("user", user.email)
+                    put("export_date", dateFormat.format(Date()))
+                    put("total_predictions", predictions.size)
+                    put("predictions", jsonArray)
+                }
+
+                // Share via intent
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "application/json"
+                    putExtra(Intent.EXTRA_TEXT, exportJson.toString(2))
+                    putExtra(Intent.EXTRA_SUBJECT, "FacePredictor - Export données")
+                }
+                startActivity(Intent.createChooser(shareIntent, "Exporter via..."))
+
+                LogCapture.i(TAG, "Data exported: ${predictions.size} predictions")
+            } catch (e: Exception) {
+                LogCapture.e(TAG, "Failed to export data: ${e.message}", e)
+                requireContext().showToast(getString(R.string.account_export_error))
+            }
+        }
     }
 
     private fun showChangePasswordDialog() {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_change_password, null)
 
-        val tilCurrentPassword = dialogView.findViewById<TextInputLayout>(R.id.tilCurrentPassword)
-        val tilNewPassword = dialogView.findViewById<TextInputLayout>(R.id.tilNewPassword)
-        val tilConfirmPassword = dialogView.findViewById<TextInputLayout>(R.id.tilConfirmPassword)
         val etCurrentPassword = dialogView.findViewById<TextInputEditText>(R.id.etCurrentPassword)
         val etNewPassword = dialogView.findViewById<TextInputEditText>(R.id.etNewPassword)
         val etConfirmPassword = dialogView.findViewById<TextInputEditText>(R.id.etConfirmPassword)
@@ -189,13 +398,9 @@ class AccountFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Re-authenticate
                 val credential = EmailAuthProvider.getCredential(email, currentPassword)
                 user.reauthenticate(credential).await()
-
-                // Update password
                 user.updatePassword(newPassword).await()
-
                 requireContext().showToast(getString(R.string.account_password_updated))
                 LogCapture.i(TAG, "Password changed successfully")
             } catch (e: Exception) {
@@ -211,13 +416,11 @@ class AccountFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Link email/password credential
                 val credential = EmailAuthProvider.getCredential(email, newPassword)
                 user.linkWithCredential(credential).await()
-
                 isGoogleUser = false
                 setupUserInfo()
-
+                setupSecurityInfo()
                 requireContext().showToast(getString(R.string.account_password_set))
                 LogCapture.i(TAG, "Password set successfully for Google user")
             } catch (e: Exception) {
@@ -272,10 +475,8 @@ class AccountFragment : Fragment() {
             try {
                 val credential = EmailAuthProvider.getCredential(email, password)
                 user.reauthenticate(credential).await()
-
                 firestoreRepository.clearHistory(user.uid)
                 user.delete().await()
-
                 requireContext().showToast(getString(R.string.account_delete_success))
                 LogCapture.i(TAG, "Account deleted successfully")
                 navigateToLogin()
@@ -314,10 +515,8 @@ class AccountFragment : Fragment() {
 
                     val user = FirebaseAuth.getInstance().currentUser ?: return@launch
                     user.reauthenticate(authCredential).await()
-
                     firestoreRepository.clearHistory(user.uid)
                     user.delete().await()
-
                     requireContext().showToast(getString(R.string.account_delete_success))
                     LogCapture.i(TAG, "Google account deleted successfully")
                     navigateToLogin()

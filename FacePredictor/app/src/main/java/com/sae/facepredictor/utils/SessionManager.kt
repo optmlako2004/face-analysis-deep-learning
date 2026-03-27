@@ -29,6 +29,7 @@ class SessionManager(context: Context) {
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
         private const val KEY_PREDICTION_MODE = "prediction_mode"
         private const val KEY_HAS_SEEN_TUTORIAL = "has_seen_tutorial"
+        private const val KEY_DARK_MODE = "dark_mode"
     }
 
     fun saveSession(userId: Long, username: String, email: String) {
@@ -76,6 +77,13 @@ class SessionManager(context: Context) {
 
     fun setHasSeenTutorial(userId: String, value: Boolean) =
         prefs.edit().putBoolean("${KEY_HAS_SEEN_TUTORIAL}_$userId", value).apply()
+
+    // Dark mode: -1 = system default, 0 = light, 1 = dark
+    var darkMode: Int
+        get() = prefs.getInt(KEY_DARK_MODE, -1)
+        set(value) {
+            prefs.edit().putInt(KEY_DARK_MODE, value).apply()
+        }
 
     // Backward compatibility
     var useMultitaskModel: Boolean

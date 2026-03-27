@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import com.sae.facepredictor.R
 import com.sae.facepredictor.databinding.FragmentSettingsBinding
 import com.sae.facepredictor.utils.LogCapture
 import com.sae.facepredictor.utils.PredictionMode
@@ -38,14 +40,13 @@ class SettingsFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
 
         setupModelSwitch()
+        setupDarkMode()
         setupListeners()
     }
 
     private fun setupModelSwitch() {
-        // Initialize radio button state from preferences
         selectMode(sessionManager.predictionMode)
 
-        // Handle radio button changes manually (RadioGroup doesn't manage nested RadioButtons)
         binding.radioHybrid.setOnClickListener { selectMode(PredictionMode.HYBRID) }
         binding.radioOriented.setOnClickListener { selectMode(PredictionMode.ORIENTED) }
         binding.radioMultitask.setOnClickListener { selectMode(PredictionMode.MULTITASK) }
@@ -53,13 +54,11 @@ class SettingsFragment : Fragment() {
     }
 
     private fun selectMode(mode: PredictionMode) {
-        // Uncheck all
         binding.radioHybrid.isChecked = false
         binding.radioOriented.isChecked = false
         binding.radioMultitask.isChecked = false
         binding.radioMoe.isChecked = false
 
-        // Check the selected one
         when (mode) {
             PredictionMode.HYBRID -> binding.radioHybrid.isChecked = true
             PredictionMode.ORIENTED -> binding.radioOriented.isChecked = true
@@ -67,11 +66,39 @@ class SettingsFragment : Fragment() {
             PredictionMode.MOE -> binding.radioMoe.isChecked = true
         }
 
-        // Save preference
         if (sessionManager.predictionMode != mode) {
             sessionManager.predictionMode = mode
             LogCapture.i(TAG, "Model mode changed: ${mode.label}")
             requireContext().showToast("Mode ${mode.label} activé")
+        }
+    }
+
+    private fun setupDarkMode() {
+        val currentMode = sessionManager.darkMode
+
+        // Set switch state: -1 (system) and 0 (light) = off, 1 (dark) = on
+        binding.switchDarkMode.isChecked = currentMode == 1
+        updateDarkModeDesc(currentMode)
+
+        binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            val newMode = if (isChecked) 1 else 0
+            sessionManager.darkMode = newMode
+            updateDarkModeDesc(newMode)
+
+            AppCompatDelegate.setDefaultNightMode(
+                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+
+            LogCapture.i(TAG, "Dark mode: ${if (isChecked) "ON" else "OFF"}")
+        }
+    }
+
+    private fun updateDarkModeDesc(mode: Int) {
+        binding.tvDarkModeDesc.text = when (mode) {
+            1 -> getString(R.string.settings_dark_mode_on)
+            0 -> getString(R.string.settings_dark_mode_off)
+            else -> getString(R.string.settings_dark_mode_system)
         }
     }
 

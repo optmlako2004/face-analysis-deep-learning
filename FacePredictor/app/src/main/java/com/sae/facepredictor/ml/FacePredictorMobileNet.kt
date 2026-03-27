@@ -6,6 +6,7 @@ import com.sae.facepredictor.data.model.Ethnicity
 import com.sae.facepredictor.data.model.Gender
 import com.sae.facepredictor.data.model.PredictionResult
 import com.sae.facepredictor.utils.LogCapture
+import com.sae.facepredictor.utils.estimateAgeConfidence
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -130,7 +131,7 @@ class FacePredictorMobileNet(private val context: Context) {
 
             PredictionResult(
                 age = age,
-                ageConfidence = 0.85f,
+                ageConfidence = estimateAgeConfidence(age),
                 gender = gender,
                 genderConfidence = genderConfidence,
                 ethnicity = ethnicity,

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark palette: Tech bleu / gris — mode sombre -->
+    <color name="primary">#8FAFC7</color>
+    <color name="primary_dark">#6888A3</color>
+    <color name="primary_light">#1D3557</color>
+    <color name="primary_container">#1A2D42</color>
+    <color name="secondary">#6FA3C4</color>
+    <color name="secondary_dark">#457B9D</color>
+    <color name="secondary_light">#1E3A50</color>
+    <color name="secondary_container">#1A2E3E</color>
+    <color name="accent">#8FAFC7</color>
+    <color name="accent_dark">#6888A3</color>
+    <color name="background">#0F1923</color>
+    <color name="surface">#16212E</color>
+    <color name="card_background">#1A2B3A</color>
+    <color name="surface_variant">#1E2F3F</color>
+    <color name="text_primary">#E8EDF2</color>
+    <color name="text_secondary">#8C9BAA</color>
+    <color name="text_tertiary">#5C6D7E</color>
+    <color name="text_on_primary">#0F1923</color>
+    <color name="text_on_secondary">#0F1923</color>
+    <color name="success">#4ADE80</color>
+    <color name="success_light">#132B1E</color>
+    <color name="warning">#FBBF24</color>
+    <color name="warning_light">#2B2410</color>
+    <color name="error">#F87171</color>
+    <color name="error_light">#2B1515</color>
+    <color name="info">#67C5D8</color>
+    <color name="info_light">#0F2A30</color>
+    <color name="male_color">#60A5FA</color>
+    <color name="male_background">#152440</color>
+    <color name="female_color">#F472B6</color>
+    <color name="female_background">#301828</color>
+    <color name="age_card">#2B2410</color>
+    <color name="age_card_border">#C9962E</color>
+    <color name="gender_card">#251830</color>
+    <color name="gender_card_border">#A06AB5</color>
+    <color name="ethnicity_card">#0F2A28</color>
+    <color name="ethnicity_card_border">#2D9E8E</color>
+    <color name="gradient_start">#0F1923</color>
+    <color name="gradient_end">#16212E</color>
+    <color name="overlay_dark">#99000000</color>
+    <color name="overlay_light">#330F1923</color>
+    <color name="divider">#1E2F3F</color>
+    <color name="ripple_primary">#338FAFC7</color>
+</resources>
