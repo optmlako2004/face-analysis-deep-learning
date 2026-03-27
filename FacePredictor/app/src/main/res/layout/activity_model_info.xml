@@ -4,18 +4,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_stage_poster">
 
-    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/primary"
-        app:title="@string/model_information"
-        app:titleTextColor="@color/text_on_primary"
+        android:background="@android:color/transparent"
         app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="@color/text_on_primary"
+        app:title="@string/model_information"
+        app:titleTextColor="@color/text_primary"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -32,193 +30,195 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/margin_medium">
+            android:padding="24dp">
 
-            <!-- Model Header Card -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_badge_ink"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="8dp"
+                android:text="MODEL DATA"
+                android:textColor="@color/text_on_primary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardBackgroundColor="@color/primary"
-                android:layout_marginBottom="@dimen/margin_medium">
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_panel_ink"
                     android:orientation="vertical"
-                    android:padding="@dimen/margin_medium">
+                    android:padding="20dp">
 
                     <TextView
                         android:id="@+id/tvModelName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-condensed"
                         android:text="Face Predictor V2"
-                        android:textSize="@dimen/text_size_xlarge"
                         android:textColor="@color/text_on_primary"
+                        android:textSize="32sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvModelType"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
                         android:text="Multi-task EfficientNetB0"
-                        android:textSize="@dimen/text_size_medium"
                         android:textColor="@color/text_on_primary"
-                        android:alpha="0.9"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="15sp" />
 
                     <TextView
                         android:id="@+id/tvInputSize"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_small"
+                        android:layout_marginTop="6dp"
                         android:textColor="@color/text_on_primary"
-                        android:alpha="0.8"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="13sp" />
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Performances par tache"
-                android:textSize="@dimen/text_size_large"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
-                android:layout_marginBottom="@dimen/margin_small" />
-
-            <!-- Age Performance Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardBackgroundColor="@color/age_card"
-                android:layout_marginBottom="@dimen/margin_small">
+                android:layout_marginTop="14dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_panel_paper"
                     android:orientation="vertical"
-                    android:padding="@dimen/margin_medium">
+                    android:padding="18dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/age"
-                        android:textSize="@dimen/text_size_large"
                         android:textColor="@color/text_primary"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvAgeMetrics"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_medium"
+                        android:layout_marginTop="8dp"
                         android:textColor="@color/text_secondary"
-                        android:layout_marginTop="@dimen/margin_small" />
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Gender Performance Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardBackgroundColor="@color/gender_card"
-                android:layout_marginBottom="@dimen/margin_small">
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_panel_accent"
                     android:orientation="vertical"
-                    android:padding="@dimen/margin_medium">
+                    android:padding="18dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/gender"
-                        android:textSize="@dimen/text_size_large"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_on_secondary"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvGenderMetrics"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textColor="@color/text_secondary"
-                        android:layout_marginTop="@dimen/margin_small" />
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/text_on_secondary"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Ethnicity Performance Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                app:cardBackgroundColor="@color/ethnicity_card"
-                android:layout_marginBottom="@dimen/margin_medium">
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_panel_ink"
                     android:orientation="vertical"
-                    android:padding="@dimen/margin_medium">
+                    android:padding="18dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/ethnicity"
-                        android:textSize="@dimen/text_size_large"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_on_primary"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvEthnicityMetrics"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textColor="@color/text_secondary"
-                        android:layout_marginTop="@dimen/margin_small" />
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/text_on_primary"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Improvements Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/card_corner_radius"
-                android:layout_marginBottom="@dimen/margin_medium">
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_panel_paper"
                     android:orientation="vertical"
-                    android:padding="@dimen/margin_medium">
+                    android:padding="18dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Techniques utilisees"
-                        android:textSize="@dimen/text_size_large"
                         android:textColor="@color/text_primary"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvImprovements"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/text_size_medium"
+                        android:layout_marginTop="8dp"
                         android:textColor="@color/text_secondary"
-                        android:layout_marginTop="@dimen/margin_small" />
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 

@@ -4,264 +4,211 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@drawable/bg_stage_poster"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/margin_large">
+        android:padding="24dp"
+        android:paddingBottom="112dp">
 
-        <!-- Header -->
         <TextView
+            android:id="@+id/tvPredictionLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_badge_ink"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="8dp"
+            android:text="@string/label_prediction_modes"
+            android:textColor="@color/text_on_primary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:fontFamily="sans-serif-condensed"
+            android:lineSpacingExtra="-2sp"
             android:text="@string/nav_prediction"
             android:textColor="@color/text_primary"
-            android:textSize="@dimen/text_size_title"
-            android:textStyle="bold"
-            android:layout_marginBottom="@dimen/margin_small" />
+            android:textSize="38sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Analysez un visage avec l\'IA"
+            android:layout_marginTop="10dp"
+            android:text="@string/prediction_simple_desc"
             android:textColor="@color/text_secondary"
-            android:textSize="@dimen/text_size_body"
-            android:layout_marginBottom="@dimen/margin_large" />
+            android:textSize="16sp" />
 
-        <!-- Main Actions -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="@dimen/margin_medium">
+            android:layout_marginTop="26dp"
+            android:orientation="vertical">
 
-            <!-- Camera Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardCamera"
-                android:layout_width="0dp"
-                android:layout_height="160dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="@dimen/margin_small"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true">
+                android:layout_width="match_parent"
+                android:layout_height="228dp"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/gradient_primary"
+                    android:background="@drawable/bg_panel_ink"
+                    android:gravity="bottom"
                     android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="@dimen/margin_medium">
+                    android:padding="22dp">
 
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
                         android:src="@drawable/ic_camera"
-                        app:tint="@color/text_on_primary"
-                        android:contentDescription="@string/take_photo" />
+                        app:tint="@color/text_on_primary" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:fontFamily="sans-serif-condensed"
                         android:text="@string/take_photo"
                         android:textColor="@color/text_on_primary"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textStyle="bold"
-                        android:textAlignment="center"
-                        android:layout_marginTop="@dimen/margin_small" />
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Capture unique"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/home_subtitle"
                         android:textColor="@color/text_on_primary"
-                        android:textSize="@dimen/text_size_small"
-                        android:alpha="0.8" />
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- Realtime Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardRealtime"
-                android:layout_width="0dp"
-                android:layout_height="160dp"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/margin_small"
-                app:cardCornerRadius="@dimen/card_corner_radius_large"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp"
-                android:clickable="true"
-                android:focusable="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/gradient_secondary"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="@dimen/margin_medium">
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_realtime"
-                        app:tint="@color/text_on_primary"
-                        android:contentDescription="@string/realtime_mode" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/realtime_mode"
-                        android:textColor="@color/text_on_primary"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textStyle="bold"
-                        android:textAlignment="center"
-                        android:layout_marginTop="@dimen/margin_small" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/realtime_description"
-                        android:textColor="@color/text_on_primary"
-                        android:textSize="@dimen/text_size_small"
-                        android:alpha="0.8" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-
-        <!-- Gallery Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardGallery"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/margin_large"
-            app:cardCornerRadius="@dimen/card_corner_radius"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp"
-            android:clickable="true"
-            android:focusable="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="@dimen/margin_large"
-                android:gravity="center_vertical">
+                android:orientation="vertical">
 
-                <View
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:background="@drawable/circle_gallery" />
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardRealtime"
+                    android:layout_width="match_parent"
+                    android:layout_height="108dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardElevation="0dp">
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="@dimen/margin_medium">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_panel_accent"
+                        android:gravity="bottom"
+                        android:orientation="vertical"
+                        android:padding="18dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/choose_gallery"
-                        android:textColor="@color/text_primary"
-                        android:textSize="@dimen/text_size_medium"
-                        android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-condensed"
+                            android:text="@string/realtime_mode"
+                            android:textColor="@color/text_on_secondary"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Sélectionnez une image existante"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
 
-                </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_right"
-                    app:tint="@color/text_tertiary"
-                    android:contentDescription="@null" />
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardGallery"
+                    android:layout_width="match_parent"
+                    android:layout_height="108dp"
+                    android:layout_marginTop="12dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_panel_paper"
+                        android:gravity="bottom"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-condensed"
+                            android:text="@string/choose_gallery"
+                            android:textColor="@color/text_primary"
+                            android:textSize="24sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
 
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- History Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/view_history"
-            android:textColor="@color/text_primary"
-            android:textSize="@dimen/text_size_large"
-            android:textStyle="bold"
-            android:layout_marginBottom="@dimen/margin_medium" />
+        </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardHistory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="@dimen/card_corner_radius"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp"
-            android:clickable="true"
-            android:focusable="true">
+            android:layout_marginTop="24dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_panel_paper"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="@dimen/margin_large"
-                android:gravity="center_vertical">
-
-                <View
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:background="@drawable/circle_history" />
+                android:padding="22dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="@dimen/margin_medium">
+                    android:orientation="vertical">
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Voir l\'historique"
+                        android:fontFamily="sans-serif-condensed"
+                        android:text="@string/view_history"
                         android:textColor="@color/text_primary"
-                        android:textSize="@dimen/text_size_medium"
+                        android:textSize="28sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvHistoryCount"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="0 prédictions sauvegardées"
+                        android:layout_marginTop="6dp"
+                        android:text="0 prediction sauvegardee"
                         android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_size_small" />
+                        android:textSize="15sp" />
 
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_right"
-                    app:tint="@color/text_tertiary"
-                    android:contentDescription="@null" />
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/ic_history"
+                    app:tint="@color/primary" />
 
             </LinearLayout>
 

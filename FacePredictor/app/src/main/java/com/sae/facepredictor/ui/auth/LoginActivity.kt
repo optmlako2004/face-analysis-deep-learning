@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -14,9 +16,10 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import com.sae.facepredictor.R
 import com.sae.facepredictor.data.firebase.FirebaseAuthService
-import com.sae.facepredictor.databinding.ActivityLoginBinding
 import com.sae.facepredictor.ui.main.MainActivity
 import com.sae.facepredictor.utils.SecurityUtils
 import com.sae.facepredictor.utils.showToast
@@ -24,9 +27,14 @@ import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityLoginBinding
     private lateinit var authService: FirebaseAuthService
     private lateinit var credentialManager: CredentialManager
+    private lateinit var etEmail: TextInputEditText
+    private lateinit var etPassword: TextInputEditText
+    private lateinit var btnLogin: MaterialButton
+    private lateinit var btnGoogleSignIn: MaterialButton
+    private lateinit var tvRegister: TextView
+    private lateinit var progressBar: ProgressBar
 
     companion object {
         private const val TAG = "LoginActivity"
@@ -36,8 +44,14 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_login)
+
+        etEmail = findViewById(R.id.etEmail)
+        etPassword = findViewById(R.id.etPassword)
+        btnLogin = findViewById(R.id.btnLogin)
+        btnGoogleSignIn = findViewById(R.id.btnGoogleSignIn)
+        tvRegister = findViewById(R.id.tvRegister)
+        progressBar = findViewById(R.id.progressBar)
 
         authService = FirebaseAuthService.getInstance()
         credentialManager = CredentialManager.create(this)
@@ -53,9 +67,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         // Login with email/password
-        binding.btnLogin.setOnClickListener {
-            val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString()
+        btnLogin.setOnClickListener {
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString()
 
             if (validateInput(email, password)) {
                 performLogin(email, password)
@@ -63,12 +77,12 @@ class LoginActivity : AppCompatActivity() {
         }
 
         // Google Sign-In
-        binding.btnGoogleSignIn.setOnClickListener {
+        btnGoogleSignIn.setOnClickListener {
             performGoogleSignIn()
         }
 
         // Navigate to register
-        binding.tvRegister.setOnClickListener {
+        tvRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
@@ -171,11 +185,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setLoading(loading: Boolean) {
-        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-        binding.btnLogin.isEnabled = !loading
-        binding.btnGoogleSignIn.isEnabled = !loading
-        binding.etEmail.isEnabled = !loading
-        binding.etPassword.isEnabled = !loading
+        progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+        btnLogin.isEnabled = !loading
+        btnGoogleSignIn.isEnabled = !loading
+        etEmail.isEnabled = !loading
+        etPassword.isEnabled = !loading
     }
 
     private fun navigateToMain() {
