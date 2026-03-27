@@ -4,9 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@color/primary_dark">
 
-    <!-- Camera Preview -->
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
         android:layout_width="0dp"
@@ -16,7 +15,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Face Detection Overlay -->
     <com.sae.facepredictor.ui.camera.FaceOverlayView
         android:id="@+id/faceOverlay"
         android:layout_width="0dp"
@@ -26,17 +24,16 @@
         app:layout_constraintStart_toStartOf="@id/previewView"
         app:layout_constraintEnd_toEndOf="@id/previewView" />
 
-    <!-- Status indicator (top) -->
     <LinearLayout
         android:id="@+id/statusBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/chip_background"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
         android:layout_margin="16dp"
+        android:background="@drawable/bg_badge_ink"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -50,49 +47,46 @@
             android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:text="@string/realtime_analyzing"
             android:textColor="@color/text_on_primary"
             android:textSize="12sp"
-            android:layout_marginStart="8dp" />
+            android:textStyle="bold" />
 
     </LinearLayout>
 
-    <!-- Close button (top right) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnClose"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_close"
         android:contentDescription="@string/delete"
-        app:backgroundTint="@color/overlay_dark"
-        app:tint="@color/text_on_primary"
+        android:src="@drawable/ic_close"
+        app:backgroundTint="@color/surface"
         app:fabSize="mini"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/primary" />
 
-    <!-- Switch camera button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnSwitchCamera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_switch_camera"
         android:contentDescription="@string/switch_camera"
-        app:backgroundTint="@color/overlay_dark"
-        app:tint="@color/text_on_primary"
+        android:src="@drawable/ic_switch_camera"
+        app:backgroundTint="@color/surface"
         app:fabSize="mini"
         app:layout_constraintTop_toBottomOf="@id/btnClose"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/primary" />
 
-    <!-- Results Card (Bottom) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/resultsCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
-        app:strokeWidth="0dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -100,22 +94,21 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_panel_paper"
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- No face detected message -->
             <TextView
                 android:id="@+id/tvNoFace"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingVertical="20dp"
                 android:text="@string/realtime_no_face"
+                android:textAlignment="center"
                 android:textColor="@color/text_secondary"
                 android:textSize="16sp"
-                android:textAlignment="center"
-                android:visibility="visible"
-                android:paddingVertical="24dp" />
+                android:visibility="visible" />
 
-            <!-- Results container -->
             <LinearLayout
                 android:id="@+id/resultsContainer"
                 android:layout_width="match_parent"
@@ -123,21 +116,17 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <!-- Results Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_marginBottom="16dp">
+                    android:orientation="horizontal">
 
-                    <!-- Age -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical"
                         android:gravity="center"
+                        android:orientation="vertical"
                         android:padding="8dp">
 
                         <View
@@ -149,11 +138,11 @@
                             android:id="@+id/tvAge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
                             android:text="--"
-                            android:textColor="@color/age_card_border"
+                            android:textColor="@color/text_primary"
                             android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="8dp" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -172,13 +161,12 @@
 
                     </LinearLayout>
 
-                    <!-- Gender -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical"
                         android:gravity="center"
+                        android:orientation="vertical"
                         android:padding="8dp">
 
                         <View
@@ -191,11 +179,11 @@
                             android:id="@+id/tvGender"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
                             android:text="--"
                             android:textColor="@color/male_color"
                             android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="8dp" />
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -214,13 +202,12 @@
 
                     </LinearLayout>
 
-                    <!-- Ethnicity -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical"
                         android:gravity="center"
+                        android:orientation="vertical"
                         android:padding="8dp">
 
                         <View
@@ -232,13 +219,13 @@
                             android:id="@+id/tvEthnicity"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="--"
-                            android:textColor="@color/ethnicity_card_border"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
                             android:layout_marginTop="8dp"
+                            android:ellipsize="end"
                             android:maxLines="1"
-                            android:ellipsize="end" />
+                            android:text="--"
+                            android:textColor="@color/primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -259,17 +246,15 @@
 
                 </LinearLayout>
 
-                <!-- Capture Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCapture"
+                    style="@style/PrimaryButton"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:layout_marginTop="18dp"
                     android:text="@string/realtime_capture"
-                    android:textColor="@color/text_on_primary"
-                    android:textSize="16sp"
                     android:textAllCaps="false"
-                    app:backgroundTint="@color/primary"
-                    app:cornerRadius="12dp"
+                    android:textStyle="bold"
                     app:icon="@drawable/ic_camera"
                     app:iconGravity="textStart"
                     app:iconTint="@color/text_on_primary" />
@@ -280,7 +265,6 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Loading overlay for capture -->
     <FrameLayout
         android:id="@+id/loadingOverlay"
         android:layout_width="0dp"
@@ -296,21 +280,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="vertical">
 
             <ProgressBar
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:indeterminateTint="@color/primary" />
+                android:indeterminateTint="@color/secondary" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="@string/realtime_saving"
                 android:textColor="@color/text_on_primary"
-                android:textSize="14sp"
-                android:layout_marginTop="16dp" />
+                android:textSize="14sp" />
 
         </LinearLayout>
 

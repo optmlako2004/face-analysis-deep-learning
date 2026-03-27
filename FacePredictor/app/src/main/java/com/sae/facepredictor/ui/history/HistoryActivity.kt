@@ -12,29 +12,19 @@ import com.sae.facepredictor.data.firebase.FirestorePrediction
 import com.sae.facepredictor.data.firebase.FirestoreRepository
 import com.sae.facepredictor.databinding.ActivityHistoryBinding
 import com.sae.facepredictor.utils.showToast
-import com.sae.facepredictor.utils.toFormattedDate
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class HistoryActivity : AppCompatActivity() {
 
-    private enum class AgeRange(val label: String) {
-        ALL("Tous"),
-        CHILD("0-17 ans"),
-        YOUNG_ADULT("18-29 ans"),
-        ADULT("30-49 ans"),
-        SENIOR("50+ ans")
-    }
-
     private lateinit var binding: ActivityHistoryBinding
     private lateinit var authService: FirebaseAuthService
     private lateinit var firestoreRepository: FirestoreRepository
     private lateinit var adapter: HistoryAdapter
-
     private var allPredictions: List<FirestorePrediction> = emptyList()
-    private var selectedGender = "Tous"
-    private var selectedAgeRange = AgeRange.ALL
-    private var selectedEthnicity = "Toutes"
+    private var selectedGender = GENDER_ALL
+    private var selectedAgeRange = AGE_ALL
+    private var selectedEthnicity = ETHNICITY_ALL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,29 +59,54 @@ class HistoryActivity : AppCompatActivity() {
             }
         )
 
-        binding.btnFilterGender.setOnClickListener {
-            showGenderFilterDialog()
-        }
-
-        binding.btnFilterAgeRange.setOnClickListener {
-            showAgeFilterDialog()
-        }
-
-        binding.btnFilterEthnicity.setOnClickListener {
-            showEthnicityFilterDialog()
-        }
-
-        binding.btnClearFilters.setOnClickListener {
-            clearFilters()
-        }
-
         binding.rvHistory.apply {
             layoutManager = LinearLayoutManager(this@HistoryActivity)
             adapter = this@HistoryActivity.adapter
             setHasFixedSize(true)
         }
 
-        updateFilterButtons()
+        binding.btnGenderFilter.setOnClickListener {
+            showSingleChoiceDialog(
+                title = "Filtrer par genre",
+                options = GENDER_OPTIONS,
+                selectedValue = selectedGender
+            ) {
+                selectedGender = it
+                applyFilters()
+            }
+        }
+
+        binding.btnAgeFilter.setOnClickListener {
+            showSingleChoiceDialog(
+                title = "Filtrer par age",
+                options = AGE_OPTIONS,
+                selectedValue = selectedAgeRange
+            ) {
+                selectedAgeRange = it
+                applyFilters()
+            }
+        }
+
+        binding.btnEthnicityFilter.setOnClickListener {
+            val options = buildEthnicityOptions()
+            showSingleChoiceDialog(
+                title = "Filtrer par ethnie",
+                options = options,
+                selectedValue = selectedEthnicity
+            ) {
+                selectedEthnicity = it
+                applyFilters()
+            }
+        }
+
+        binding.btnResetFilters.setOnClickListener {
+            selectedGender = GENDER_ALL
+            selectedAgeRange = AGE_ALL
+            selectedEthnicity = ETHNICITY_ALL
+            applyFilters()
+        }
+
+        updateFilterUI()
     }
 
     private fun loadHistory() {
@@ -102,44 +117,26 @@ class HistoryActivity : AppCompatActivity() {
                 firestoreRepository.getPredictionsByUser(userId)
                     .collectLatest { predictions ->
                         allPredictions = predictions
-                        updateTopSummary(predictions)
+                        binding.progressBar.visibility = View.GONE
                         applyFilters()
                     }
             } catch (e: Exception) {
                 binding.progressBar.visibility = View.GONE
                 binding.emptyState.visibility = View.VISIBLE
                 binding.rvHistory.visibility = View.GONE
-                binding.tvHistoryStatus.text = "Erreur"
-                binding.tvLastAnalysis.text = "Dernière analyse : impossible à charger"
                 showToast("Erreur de chargement de l'historique")
             }
         }
     }
 
-    private fun updateTopSummary(predictions: List<FirestorePrediction>) {
-        binding.tvLastAnalysis.text = predictions.firstOrNull()?.let {
-            "Dernière analyse : ${it.createdAtMillis.toFormattedDate()}"
-        } ?: "Dernière analyse : aucune donnée"
-    }
-
     private fun applyFilters() {
-        binding.progressBar.visibility = View.GONE
-
         val filteredPredictions = allPredictions.filter { prediction ->
             matchesGender(prediction) &&
                 matchesAgeRange(prediction) &&
                 matchesEthnicity(prediction)
         }
 
-        binding.tvHistoryCount.text = filteredPredictions.size.toString()
-        binding.tvHistoryStatus.text = if (filteredPredictions.isEmpty()) "Aucun résultat" else "Synchronisé"
-        binding.tvSectionSubtitle.text = if (hasActiveFilters()) {
-            "${getActiveFiltersLabel()} • ${filteredPredictions.size} résultat(s)"
-        } else {
-            "Chaque carte reprend l'image source et les attributs détectés."
-        }
-        binding.btnClearFilters.visibility = if (hasActiveFilters()) View.VISIBLE else View.GONE
-        updateFilterButtons()
+        updateFilterUI(filteredPredictions.size)
 
         if (filteredPredictions.isEmpty()) {
             binding.emptyState.visibility = View.VISIBLE
@@ -152,108 +149,74 @@ class HistoryActivity : AppCompatActivity() {
     }
 
     private fun matchesGender(prediction: FirestorePrediction): Boolean {
-        return selectedGender == "Tous" ||
-            prediction.predictedGender.equals(selectedGender, ignoreCase = true)
+        if (selectedGender == GENDER_ALL) return true
+        return prediction.predictedGender.equals(selectedGender, ignoreCase = true)
     }
 
     private fun matchesAgeRange(prediction: FirestorePrediction): Boolean {
-        val age = prediction.predictedAge
         return when (selectedAgeRange) {
-            AgeRange.ALL -> true
-            AgeRange.CHILD -> age in 0..17
-            AgeRange.YOUNG_ADULT -> age in 18..29
-            AgeRange.ADULT -> age in 30..49
-            AgeRange.SENIOR -> age >= 50
+            AGE_ALL -> true
+            "0-17" -> prediction.predictedAge in 0..17
+            "18-29" -> prediction.predictedAge in 18..29
+            "30-49" -> prediction.predictedAge in 30..49
+            "50+" -> prediction.predictedAge >= 50
+            else -> true
         }
     }
 
     private fun matchesEthnicity(prediction: FirestorePrediction): Boolean {
-        return selectedEthnicity == "Toutes" ||
-            prediction.predictedEthnicity.equals(selectedEthnicity, ignoreCase = true)
+        if (selectedEthnicity == ETHNICITY_ALL) return true
+        return prediction.predictedEthnicity.equals(selectedEthnicity, ignoreCase = true)
     }
 
-    private fun showGenderFilterDialog() {
-        val options = arrayOf("Tous", "Homme", "Femme")
-        val checkedItem = options.indexOf(selectedGender).coerceAtLeast(0)
+    private fun updateFilterUI(resultCount: Int = allPredictions.size) {
+        binding.btnGenderFilter.text = "Genre : $selectedGender"
+        binding.btnAgeFilter.text = "Age : $selectedAgeRange"
+        binding.btnEthnicityFilter.text = "Ethnie : $selectedEthnicity"
 
-        AlertDialog.Builder(this)
-            .setTitle("Filtrer par genre")
-            .setSingleChoiceItems(options, checkedItem) { dialog, which ->
-                selectedGender = options[which]
-                applyFilters()
-                dialog.dismiss()
-            }
-            .setNegativeButton("Annuler", null)
-            .show()
+        val hasActiveFilters = selectedGender != GENDER_ALL ||
+            selectedAgeRange != AGE_ALL ||
+            selectedEthnicity != ETHNICITY_ALL
+
+        binding.btnResetFilters.visibility = if (hasActiveFilters) View.VISIBLE else View.GONE
+        binding.tvFilterSummary.text = if (hasActiveFilters) {
+            "$resultCount resultat(s) apres filtrage"
+        } else {
+            getString(R.string.history_summary_all)
+        }
     }
 
-    private fun showAgeFilterDialog() {
-        val options = AgeRange.entries.toTypedArray()
-        val labels = options.map { it.label }.toTypedArray()
-        val checkedItem = options.indexOf(selectedAgeRange).coerceAtLeast(0)
-
-        AlertDialog.Builder(this)
-            .setTitle("Filtrer par tranche d'âge")
-            .setSingleChoiceItems(labels, checkedItem) { dialog, which ->
-                selectedAgeRange = options[which]
-                applyFilters()
-                dialog.dismiss()
-            }
-            .setNegativeButton("Annuler", null)
-            .show()
-    }
-
-    private fun showEthnicityFilterDialog() {
+    private fun buildEthnicityOptions(): Array<String> {
         val dynamicEthnicities = allPredictions
             .map { it.predictedEthnicity.trim() }
             .filter { it.isNotEmpty() }
             .distinct()
             .sorted()
-        val options = listOf("Toutes") + dynamicEthnicities
-        val checkedItem = options.indexOf(selectedEthnicity).let { if (it >= 0) it else 0 }
 
+        return arrayOf(ETHNICITY_ALL, *dynamicEthnicities.toTypedArray())
+    }
+
+    private fun showSingleChoiceDialog(
+        title: String,
+        options: Array<String>,
+        selectedValue: String,
+        onSelected: (String) -> Unit
+    ) {
+        val selectedIndex = options.indexOf(selectedValue).coerceAtLeast(0)
         AlertDialog.Builder(this)
-            .setTitle("Filtrer par ethnie")
-            .setSingleChoiceItems(options.toTypedArray(), checkedItem) { dialog, which ->
-                selectedEthnicity = options[which]
-                applyFilters()
+            .setTitle(title)
+            .setSingleChoiceItems(options, selectedIndex) { dialog, which ->
+                onSelected(options[which])
                 dialog.dismiss()
             }
             .setNegativeButton("Annuler", null)
             .show()
     }
 
-    private fun clearFilters() {
-        selectedGender = "Tous"
-        selectedAgeRange = AgeRange.ALL
-        selectedEthnicity = "Toutes"
-        applyFilters()
-    }
-
-    private fun hasActiveFilters(): Boolean {
-        return selectedGender != "Tous" ||
-            selectedAgeRange != AgeRange.ALL ||
-            selectedEthnicity != "Toutes"
-    }
-
-    private fun updateFilterButtons() {
-        binding.btnFilterGender.text = "Genre : $selectedGender"
-        binding.btnFilterAgeRange.text = "Âge : ${selectedAgeRange.label}"
-        binding.btnFilterEthnicity.text = "Ethnie : $selectedEthnicity"
-    }
-
-    private fun getActiveFiltersLabel(): String {
-        val labels = mutableListOf<String>()
-        if (selectedGender != "Tous") labels += selectedGender
-        if (selectedAgeRange != AgeRange.ALL) labels += selectedAgeRange.label
-        if (selectedEthnicity != "Toutes") labels += selectedEthnicity
-        return labels.joinToString(" • ")
-    }
-
     private fun showDeleteConfirmation(prediction: FirestorePrediction) {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.delete))
-            .setMessage("Supprimer cette prédiction ?")
+            .setMessage("Supprimer cette prediction ?")
             .setPositiveButton(getString(R.string.delete)) { _, _ ->
                 deletePrediction(prediction)
             }
@@ -276,7 +239,7 @@ class HistoryActivity : AppCompatActivity() {
         lifecycleScope.launch {
             firestoreRepository.deletePrediction(prediction.id)
                 .onSuccess {
-                    showToast("Supprimé")
+                    showToast("Supprime")
                 }
                 .onFailure {
                     showToast("Erreur de suppression")
@@ -290,11 +253,20 @@ class HistoryActivity : AppCompatActivity() {
         lifecycleScope.launch {
             firestoreRepository.clearHistory(userId)
                 .onSuccess {
-                    showToast("Historique vidé")
+                    showToast("Historique vide")
                 }
                 .onFailure {
                     showToast("Erreur")
                 }
         }
+    }
+
+    companion object {
+        private const val GENDER_ALL = "Tous"
+        private const val AGE_ALL = "Tous"
+        private const val ETHNICITY_ALL = "Toutes"
+
+        private val GENDER_OPTIONS = arrayOf(GENDER_ALL, "Homme", "Femme")
+        private val AGE_OPTIONS = arrayOf(AGE_ALL, "0-17", "18-29", "30-49", "50+")
     }
 }
