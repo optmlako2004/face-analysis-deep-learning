@@ -67,7 +67,7 @@ class SessionManager(context: Context) {
 
     // Prediction mode: ORIENTED, MULTITASK, or HYBRID (default)
     var predictionMode: PredictionMode
-        get() = PredictionMode.fromValue(prefs.getInt(KEY_PREDICTION_MODE, PredictionMode.MOE.value))
+        get() = PredictionMode.fromValue(prefs.getInt(KEY_PREDICTION_MODE, PredictionMode.HYBRID.value))
         set(value) {
             prefs.edit().putInt(KEY_PREDICTION_MODE, value.value).apply()
         }
