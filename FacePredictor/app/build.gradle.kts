@@ -83,6 +83,7 @@ dependencies {
         exclude(group = "org.tensorflow", module = "tensorflow-lite-api")
     }
     implementation("org.tensorflow:tensorflow-lite-gpu:2.17.0")
+    implementation("org.tensorflow:tensorflow-lite-select-tf-ops:2.16.1")
 
     // MediaPipe for Face Detection
     implementation("com.google.mediapipe:tasks-vision:0.10.9")
