@@ -84,26 +84,27 @@ class FacePredictorMoE(private val context: Context) {
         )
 
         // Inference on original
-        val ageOut1 = Array(1) { FloatArray(1) }
+        // Output order: [0]=gender, [1]=age, [2]=ethnicity(5 classes)
         val genderOut1 = Array(1) { FloatArray(1) }
-        val ethOut1 = Array(1) { FloatArray(4) }
+        val ageOut1 = Array(1) { FloatArray(1) }
+        val ethOut1 = Array(1) { FloatArray(5) }
         val outputMap1 = HashMap<Int, Any>().apply {
-            put(0, ageOut1); put(1, genderOut1); put(2, ethOut1)
+            put(0, genderOut1); put(1, ageOut1); put(2, ethOut1)
         }
         interpreter!!.runForMultipleInputsOutputs(arrayOf(bitmapToByteBuffer(resizedBitmap)), outputMap1)
 
         // Inference on flipped
-        val ageOut2 = Array(1) { FloatArray(1) }
         val genderOut2 = Array(1) { FloatArray(1) }
-        val ethOut2 = Array(1) { FloatArray(4) }
+        val ageOut2 = Array(1) { FloatArray(1) }
+        val ethOut2 = Array(1) { FloatArray(5) }
         val outputMap2 = HashMap<Int, Any>().apply {
-            put(0, ageOut2); put(1, genderOut2); put(2, ethOut2)
+            put(0, genderOut2); put(1, ageOut2); put(2, ethOut2)
         }
         interpreter!!.runForMultipleInputsOutputs(arrayOf(bitmapToByteBuffer(flippedBitmap)), outputMap2)
 
         val age = (ageOut1[0][0] + ageOut2[0][0]) / 2f
         val gender = (genderOut1[0][0] + genderOut2[0][0]) / 2f
-        val eth = FloatArray(4) { i -> (ethOut1[0][i] + ethOut2[0][i]) / 2f }
+        val eth = FloatArray(5) { i -> (ethOut1[0][i] + ethOut2[0][i]) / 2f }
 
         return Triple(age, gender, eth)
     }

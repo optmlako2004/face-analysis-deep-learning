@@ -70,15 +70,15 @@ class FacePredictorModel(private val context: Context) {
             val inputBuffer = bitmapToByteBuffer(resizedBitmap)
 
             // Prepare output buffers for MoE model
-            // Output order: age (1), gender (1), ethnicity (5)
-            val ageOutput = Array(1) { FloatArray(1) }
+            // Output order from logs: gender (1), age (1), ethnicity (5)
             val genderOutput = Array(1) { FloatArray(1) }
+            val ageOutput = Array(1) { FloatArray(1) }
             val ethnicityOutput = Array(1) { FloatArray(5) }  // 5 classes
 
             val outputMap = HashMap<Int, Any>()
-            outputMap[0] = ageOutput       // Index 0 = age
-            outputMap[1] = genderOutput    // Index 1 = gender
-            outputMap[2] = ethnicityOutput // Index 2 = ethnicity
+            outputMap[0] = genderOutput    // Index 0 = gender (sigmoid)
+            outputMap[1] = ageOutput       // Index 1 = age (regression)
+            outputMap[2] = ethnicityOutput // Index 2 = ethnicity (softmax)
 
             // Run inference with multiple outputs
             LogCapture.d(TAG, "Running multitask inference...")
