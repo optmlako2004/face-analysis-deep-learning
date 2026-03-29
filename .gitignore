@@ -92,3 +92,4 @@ training/output_v2/*.keras
 training/output_moe/*.keras
 # FacePredictor.apk tracked via LFS
 # *.apk tracked via LFS
+FacePredictor.apk
