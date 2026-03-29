@@ -21,7 +21,7 @@ import com.sae.facepredictor.ui.camera.RealtimeCameraActivity
 import com.sae.facepredictor.databinding.ActivityPredictionResultBinding
 import com.sae.facepredictor.ml.FaceDetectorHelper
 import com.sae.facepredictor.ml.FacePredictorHybrid
-import com.sae.facepredictor.ml.FacePredictorMoE
+
 import com.sae.facepredictor.ml.FacePredictorModel
 import com.sae.facepredictor.ml.FacePredictorModelV2
 import com.sae.facepredictor.utils.LogCapture
@@ -47,7 +47,6 @@ class PredictionResultActivity : AppCompatActivity() {
     private var predictorV2: FacePredictorModelV2? = null
     private var predictorV4: FacePredictorModel? = null
     private var predictorHybrid: FacePredictorHybrid? = null
-    private var predictorMoE: FacePredictorMoE? = null
     private var predictionMode: PredictionMode = PredictionMode.HYBRID
     private var faceDetector: FaceDetectorHelper? = null
 
@@ -451,10 +450,13 @@ class PredictionResultActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        predictorV2?.close()
-        predictorV4?.close()
-        predictorHybrid?.close()
-        predictorMoE?.close()
-        faceDetector?.close()
+        try { predictorV2?.close() } catch (_: Exception) {}
+        try { predictorV4?.close() } catch (_: Exception) {}
+        try { predictorHybrid?.close() } catch (_: Exception) {}
+        try { faceDetector?.close() } catch (_: Exception) {}
+        predictorV2 = null
+        predictorV4 = null
+        predictorHybrid = null
+        faceDetector = null
     }
 }

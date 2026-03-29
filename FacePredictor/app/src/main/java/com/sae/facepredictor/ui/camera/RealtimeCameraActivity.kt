@@ -18,7 +18,7 @@ import com.sae.facepredictor.data.model.PredictionResult
 import com.sae.facepredictor.databinding.ActivityRealtimeCameraBinding
 import com.sae.facepredictor.ml.FaceDetectorHelper
 import com.sae.facepredictor.ml.FacePredictorHybrid
-import com.sae.facepredictor.ml.FacePredictorMoE
+
 import com.sae.facepredictor.ml.FacePredictorModel
 import com.sae.facepredictor.ml.FacePredictorModelV2
 import com.sae.facepredictor.ui.prediction.PredictionResultActivity
@@ -61,7 +61,6 @@ class RealtimeCameraActivity : AppCompatActivity() {
     private var predictorHybrid: FacePredictorHybrid? = null
     private var predictorV2: FacePredictorModelV2? = null
     private var predictorV4: FacePredictorModel? = null
-    private var predictorMoE: FacePredictorMoE? = null
 
     // State
     private val isProcessing = AtomicBoolean(false)
@@ -94,6 +93,9 @@ class RealtimeCameraActivity : AppCompatActivity() {
     private fun initializeModels() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
+                // Fermer les anciens modeles avant d'en charger de nouveaux
+                closeAllPredictors()
+
                 LogCapture.d(TAG, "Initializing models...")
                 faceDetector = FaceDetectorHelper(this@RealtimeCameraActivity)
 
@@ -443,14 +445,21 @@ class RealtimeCameraActivity : AppCompatActivity() {
         binding.btnCapture.isEnabled = !loading
     }
 
+    private fun closeAllPredictors() {
+        try { predictorHybrid?.close() } catch (_: Exception) {}
+        try { predictorV2?.close() } catch (_: Exception) {}
+        try { predictorV4?.close() } catch (_: Exception) {}
+        predictorHybrid = null
+        predictorV2 = null
+        predictorV4 = null
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
-        faceDetector?.close()
-        predictorHybrid?.close()
-        predictorV2?.close()
-        predictorV4?.close()
-        predictorMoE?.close()
+        try { faceDetector?.close() } catch (_: Exception) {}
+        closeAllPredictors()
+        faceDetector = null
         LogCapture.d(TAG, "RealtimeCameraActivity destroyed")
     }
 }
