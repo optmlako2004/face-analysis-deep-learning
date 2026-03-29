@@ -58,21 +58,47 @@
                     android:text="Hybride (recommande)"
                     android:textColor="@color/text_primary" />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="36dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="3x EfficientNetB0 + TTA — age, genre, ethnicite separes"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radioOriented"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="4dp"
                     android:text="3 Modeles specialises"
                     android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="36dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="3x EfficientNetB0 — un modele par tache"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/radioMultitask"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="Multitache"
+                    android:layout_marginTop="4dp"
+                    android:text="Multitache MoE"
                     android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="36dp"
+                    android:text="EfficientNetB0 + Mixture of Experts — 1 modele, 3 taches"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
 
             </RadioGroup>
 

@@ -19,7 +19,7 @@ class FacePredictorModel(private val context: Context) {
     private var interpreter: Interpreter? = null
     private var initError: String? = null
 
-    // Model input size (224x224 for EfficientNetB0)
+    // Model input size (224x224 for EfficientNetB0 MoE)
     private val inputSize = 224
 
     init {
@@ -33,7 +33,7 @@ class FacePredictorModel(private val context: Context) {
                 setNumThreads(4)
             }
 
-            interpreter = Interpreter(loadModelFile("multitask_model.tflite"), options)
+            interpreter = Interpreter(loadModelFile("moe_mobilenetv3.tflite"), options)
             LogCapture.i(TAG, "Multitask model V4 loaded successfully")
         } catch (e: Exception) {
             initError = e.message
@@ -62,24 +62,23 @@ class FacePredictorModel(private val context: Context) {
         }
 
         return try {
-            // Resize image to 128x128
+            // Resize image to 224x224
             val resizedBitmap = Bitmap.createScaledBitmap(bitmap, inputSize, inputSize, true)
             LogCapture.d(TAG, "Bitmap resized to ${inputSize}x${inputSize}")
 
             // Prepare input buffer
             val inputBuffer = bitmapToByteBuffer(resizedBitmap)
 
-            // Prepare output buffers for multi-output model
-            // Output order (from TFLite): gender (1), age (1), ethnicity (4)
-            val genderOutput = Array(1) { FloatArray(1) }
+            // Prepare output buffers for MoE model
+            // Output order: age (1), gender (1), ethnicity (5)
             val ageOutput = Array(1) { FloatArray(1) }
-            val ethnicityOutput = Array(1) { FloatArray(4) }  // 4 classes: Blanc, Noir, Asiatique, Indien
+            val genderOutput = Array(1) { FloatArray(1) }
+            val ethnicityOutput = Array(1) { FloatArray(5) }  // 5 classes
 
-            // Map outputs to their indices (order determined by TFLite conversion)
             val outputMap = HashMap<Int, Any>()
-            outputMap[0] = genderOutput    // Index 0 = gender (sigmoid)
-            outputMap[1] = ageOutput       // Index 1 = age (regression)
-            outputMap[2] = ethnicityOutput // Index 2 = ethnicity (softmax)
+            outputMap[0] = ageOutput       // Index 0 = age
+            outputMap[1] = genderOutput    // Index 1 = gender
+            outputMap[2] = ethnicityOutput // Index 2 = ethnicity
 
             // Run inference with multiple outputs
             LogCapture.d(TAG, "Running multitask inference...")

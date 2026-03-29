@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 enum class PredictionMode(val value: Int, val label: String, val description: String) {
     ORIENTED(0, "Orienté V2", "3 modèles spécialisés EfficientNetB0"),
-    MULTITASK(1, "Multitâche", "1 modèle unifié EfficientNetB0"),
+    MULTITASK(1, "Multitâche", "1 modèle unifié"),
     HYBRID(2, "Hybride", "Combine le meilleur de chaque modèle + TTA");
 
     companion object {
