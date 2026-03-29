@@ -33,7 +33,7 @@ class FacePredictorMoE(private val context: Context) {
     private var interpreter: Interpreter? = null
     private var initError: String? = null
 
-    private val inputSize = 128
+    private val inputSize = 224
 
     init {
         loadModel()

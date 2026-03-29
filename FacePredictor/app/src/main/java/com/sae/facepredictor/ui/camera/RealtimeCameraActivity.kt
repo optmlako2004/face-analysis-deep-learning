@@ -110,10 +110,7 @@ class RealtimeCameraActivity : AppCompatActivity() {
                         predictorV4 = FacePredictorModel(this@RealtimeCameraActivity)
                         LogCapture.i(TAG, "V4 Multitask EfficientNet predictor initialized")
                     }
-                    PredictionMode.MOE -> {
-                        predictorMoE = FacePredictorMoE(this@RealtimeCameraActivity)
-                        LogCapture.i(TAG, "MoE predictor initialized")
-                    }
+                    // MoE removed
                 }
 
                 withContext(Dispatchers.Main) {
@@ -251,12 +248,7 @@ class RealtimeCameraActivity : AppCompatActivity() {
                 )
             }
 
-            // Crop face: square crop for MoE (matches UTKFace), standard for others
-            val croppedFace = if (sessionManager.predictionMode == PredictionMode.MOE) {
-                faceDetector?.cropFaceSquare(bitmap, largestFace, 0.15f) ?: bitmap
-            } else {
-                faceDetector?.cropFace(bitmap, largestFace, 0.3f) ?: bitmap
-            }
+            val croppedFace = faceDetector?.cropFace(bitmap, largestFace, 0.3f) ?: bitmap
             val rawResult = predict(croppedFace)
 
             if (rawResult != null) {
@@ -279,7 +271,6 @@ class RealtimeCameraActivity : AppCompatActivity() {
             PredictionMode.HYBRID -> predictorHybrid?.predict(bitmap)
             PredictionMode.ORIENTED -> predictorV2?.predict(bitmap)
             PredictionMode.MULTITASK -> predictorV4?.predict(bitmap)
-            PredictionMode.MOE -> predictorMoE?.predict(bitmap)
         }
     }
 

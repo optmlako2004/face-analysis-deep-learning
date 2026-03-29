@@ -154,10 +154,7 @@ class PredictionResultActivity : AppCompatActivity() {
                         predictorV4 = FacePredictorModel(this@PredictionResultActivity)
                         LogCapture.d(TAG, "Predictor V4 Multitask initialized (1 unified EfficientNet model)")
                     }
-                    PredictionMode.MOE -> {
-                        predictorMoE = FacePredictorMoE(this@PredictionResultActivity)
-                        LogCapture.d(TAG, "Predictor MoE initialized (MobileNetV3 Mixture of Experts)")
-                    }
+                    // MoE removed - using only EfficientNetB0 models
                 }
             }
 
@@ -236,7 +233,6 @@ class PredictionResultActivity : AppCompatActivity() {
                         PredictionMode.HYBRID -> predictorHybrid?.predict(faceBitmap)
                         PredictionMode.ORIENTED -> predictorV2?.predict(faceBitmap)
                         PredictionMode.MULTITASK -> predictorV4?.predict(faceBitmap)
-                        PredictionMode.MOE -> predictorMoE?.predictEnhanced(faceBitmap)
                     }
                 } catch (e: Exception) {
                     LogCapture.e(TAG, "Prediction exception: ${e.message}", e)
@@ -275,11 +271,7 @@ class PredictionResultActivity : AppCompatActivity() {
 
             if (result.success && result.faces.isNotEmpty()) {
                 val faceRect = result.faces.first()
-                val croppedBitmap = if (predictionMode == PredictionMode.MOE) {
-                    detector.cropFaceSquare(bitmap, faceRect, padding = 0.15f)
-                } else {
-                    detector.cropFace(bitmap, faceRect, padding = 0.3f)
-                }
+                val croppedBitmap = detector.cropFace(bitmap, faceRect, padding = 0.3f)
                 FaceCropResult(croppedBitmap, true, result.faces.size)
             } else {
                 FaceCropResult(null, false, 0)

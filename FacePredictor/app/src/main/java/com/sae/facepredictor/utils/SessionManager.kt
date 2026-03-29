@@ -4,14 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 
 enum class PredictionMode(val value: Int, val label: String, val description: String) {
-    ORIENTED(0, "Orienté V2", "3 modèles spécialisés EfficientNet"),
-    MULTITASK(1, "Multitâche V4", "1 modèle unifié EfficientNet"),
-    HYBRID(2, "Hybride", "Combine le meilleur des deux modèles"),
-    MOE(4, "MoE Expert", "Mixture of Experts - MobileNetV3");
+    ORIENTED(0, "Orienté V2", "3 modèles spécialisés EfficientNetB0"),
+    MULTITASK(1, "Multitâche", "1 modèle unifié EfficientNetB0"),
+    HYBRID(2, "Hybride", "Combine le meilleur de chaque modèle + TTA");
 
     companion object {
         fun fromValue(value: Int): PredictionMode {
-            return entries.find { it.value == value } ?: MOE
+            return entries.find { it.value == value } ?: HYBRID
         }
     }
 }

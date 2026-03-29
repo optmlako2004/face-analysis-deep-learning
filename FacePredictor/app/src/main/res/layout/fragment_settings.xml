@@ -54,7 +54,8 @@
                     android:id="@+id/radioHybrid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Hybride"
+                    android:checked="true"
+                    android:text="Hybride (recommande)"
                     android:textColor="@color/text_primary" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
@@ -62,7 +63,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="Oriente V2"
+                    android:text="3 Modeles specialises"
                     android:textColor="@color/text_primary" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
@@ -70,16 +71,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="Multitache V4"
-                    android:textColor="@color/text_primary" />
-
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/radioMoe"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:checked="true"
-                    android:text="MoE Expert"
+                    android:text="Multitache"
                     android:textColor="@color/text_primary" />
 
             </RadioGroup>

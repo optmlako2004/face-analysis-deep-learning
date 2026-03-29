@@ -19,8 +19,8 @@ class FacePredictorModel(private val context: Context) {
     private var interpreter: Interpreter? = null
     private var initError: String? = null
 
-    // Model input size (128x128 as per model_info.json)
-    private val inputSize = 128
+    // Model input size (224x224 for EfficientNetB0)
+    private val inputSize = 224
 
     init {
         loadModel()

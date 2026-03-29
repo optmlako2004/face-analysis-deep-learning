@@ -50,20 +50,17 @@ class SettingsFragment : Fragment() {
         binding.radioHybrid.setOnClickListener { selectMode(PredictionMode.HYBRID) }
         binding.radioOriented.setOnClickListener { selectMode(PredictionMode.ORIENTED) }
         binding.radioMultitask.setOnClickListener { selectMode(PredictionMode.MULTITASK) }
-        binding.radioMoe.setOnClickListener { selectMode(PredictionMode.MOE) }
     }
 
     private fun selectMode(mode: PredictionMode) {
         binding.radioHybrid.isChecked = false
         binding.radioOriented.isChecked = false
         binding.radioMultitask.isChecked = false
-        binding.radioMoe.isChecked = false
 
         when (mode) {
             PredictionMode.HYBRID -> binding.radioHybrid.isChecked = true
             PredictionMode.ORIENTED -> binding.radioOriented.isChecked = true
             PredictionMode.MULTITASK -> binding.radioMultitask.isChecked = true
-            PredictionMode.MOE -> binding.radioMoe.isChecked = true
         }
 
         if (sessionManager.predictionMode != mode) {

@@ -34,7 +34,6 @@ class ModelInfoActivity : AppCompatActivity() {
             PredictionMode.HYBRID -> displayHybridInfo()
             PredictionMode.MULTITASK -> displayMultitaskInfo()
             PredictionMode.ORIENTED -> displayOrientedV2Info()
-            PredictionMode.MOE -> displayMoEInfo()
         }
     }
 
