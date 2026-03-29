@@ -29,8 +29,8 @@ class FacePredictorModelV2(private val context: Context) {
     private var ethnicityInterpreter: Interpreter? = null
     private var initError: String? = null
 
-    // Model input size (128x128 for all V2 models)
-    private val inputSize = 128
+    // Model input size (224x224 for EfficientNetB0 models)
+    private val inputSize = 224
 
     // Gender threshold (from training)
     private val genderThreshold = 0.5f

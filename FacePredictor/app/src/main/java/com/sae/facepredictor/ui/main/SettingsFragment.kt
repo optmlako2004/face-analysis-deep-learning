@@ -76,8 +76,9 @@ class SettingsFragment : Fragment() {
     private fun setupDarkMode() {
         val currentMode = sessionManager.darkMode
 
-        // Set switch state: -1 (system) and 0 (light) = off, 1 (dark) = on
-        binding.switchDarkMode.isChecked = currentMode == 1
+        // Set switch state based on actual night mode active
+        val isNightActive = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        binding.switchDarkMode.isChecked = if (currentMode == -1) isNightActive else currentMode == 1
         updateDarkModeDesc(currentMode)
 
         binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
