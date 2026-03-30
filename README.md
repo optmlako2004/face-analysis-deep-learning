@@ -14,7 +14,7 @@ Application mobile Android intelligente capable de predire l'age, le genre et l'
 | Noe Cervera | Entrainement modeles / Evaluation |
 | Dhanoush Kessavane | Tests / Documentation |
 
-**Encadrement** : Bilal Faye & Hanane Azzag (LIPN, CNRS UMR 7030)
+**Encadrement** : Bilal Faye (LIPN, CNRS UMR 7030)
 
 ---
 
@@ -245,24 +245,24 @@ En mode temps reel, un guide ovale aide l'utilisateur a positionner son visage. 
 
 ### Modes de prediction
 
-L'application propose 4 modes de prediction selectionnables dans les parametres :
+L'application propose 3 modes de prediction selectionnables dans les parametres :
 
 | Mode | Architecture | Description |
 |---|---|---|
-| **MoE Expert** (recommande) | MobileNetV3 + MoE | Mixture of Experts, meilleur compromis vitesse/precision |
-| Oriente V2 | 3x EfficientNetB0 | 3 modeles specialises separes |
-| Multitache V4 | EfficientNetB0 unifie | Un seul modele pour les 3 taches |
-| Hybride | Ensemble V2 + V4 + TTA | Combine les meilleurs modeles avec augmentation au test |
+| **Hybride** (recommande) | 3x EfficientNetB0 + TTA | Combine les 3 modeles specialises avec flip horizontal pour des resultats plus stables |
+| 3 Modeles specialises | 3x EfficientNetB0 | Un modele dedie par tache (age, genre, ethnicite) |
+| Multitache MoE | EfficientNetB0 + Mixture of Experts | 1 modele, 4 experts par tache, gating network |
 
 ### Modeles TFLite embarques
 
+Tous les modeles utilisent le backbone EfficientNetB0 (224x224) re-entraine sur UTKFace.
+
 | Fichier | Taille | Description |
 |---|---|---|
-| `moe_mobilenetv3.tflite` | 6.5 MB | MoE MobileNetV3 (recommande) |
-| `multitask_model.tflite` | 11 MB | Multitache EfficientNetB0 |
-| `age_v2_model.tflite` | 6.3 MB | Age specialise |
-| `gender_v2_model.tflite` | 5.5 MB | Genre specialise |
-| `ethnicity_v2_model.tflite` | 6.3 MB | Ethnicite specialise |
+| `age_v2_model.tflite` | 8.4 MB | Age specialise (EfficientNetB0) |
+| `gender_v2_model.tflite` | 8.4 MB | Genre specialise (EfficientNetB0) |
+| `ethnicity_v2_model.tflite` | 8.4 MB | Ethnicite specialise (EfficientNetB0) |
+| `moe_mobilenetv3.tflite` | 17 MB | Multitache MoE (EfficientNetB0 + 4 experts) |
 | `face_detection_short_range.tflite` | 0.2 MB | Detection de visage MediaPipe |
 
 ---
@@ -399,7 +399,7 @@ Toutes les metriques demandees par le sujet sont calculees :
 | Livrable | Statut | Emplacement |
 |---|---|---|
 | Code source complet | Fait | Ce depot GitHub |
-| Application Android (.apk) | Fait | `FacePredictor/app/build/outputs/apk/` |
+| Application Android (.apk) | Fait | [Telecharger dans Releases](https://github.com/optmlako2004/face-analysis-deep-learning/releases) |
 | 3 modeles specialises (Strategie 1) | Fait | `training/3_modeles_individuels.ipynb` |
 | Modele multi-tache MoE (Strategie 2) | Fait | `training/2_modele_multitache.ipynb` |
 | Comparaison des backbones (Strategie 3) | Fait | `training/1_comparaison_backbones.ipynb` |
@@ -408,9 +408,9 @@ Toutes les metriques demandees par le sujet sont calculees :
 | Historique des predictions | Fait | Firestore |
 | Mode temps reel (bonus) | Fait | Camera en continu |
 | README | Fait | Ce fichier |
-| Rapport technique | A rendre | 15-20 pages |
-| Slides de presentation | A rendre | Soutenance |
-| Video de demonstration | A rendre | Demo de l'app |
+| Rapport technique | Fait | `rapport_SAE.pdf` |
+| Slides de presentation | Fait | `presentation_SAE.pdf` |
+| Video de demonstration | Fait | Demo live a la soutenance |
 
 ---
 
@@ -423,4 +423,4 @@ Toutes les metriques demandees par le sujet sont calculees :
 ---
 
 _Projet SAE BUT3 Informatique — 2025-2026_
-_Encadrement : Bilal Faye & Hanane Azzag (LIPN, CNRS UMR 7030, Universite Sorbonne Paris Nord)_
+_Encadrement : Bilal Faye (LIPN, CNRS UMR 7030, Universite Sorbonne Paris Nord)_
