@@ -12,7 +12,7 @@ Application mobile Android intelligente capable de predire l'age, le genre et l'
 | Ako Christian | Developpement ML / Android |
 | Calrd Similien | Developpement Android / Integration |
 | Noe Cervera | Entrainement modeles / Evaluation |
-| Dhanoush Kessavane | Tests / Documentation |
+| Dhanoush Kessavane | Front-end / Design / Documentation |
 
 **Encadrement** : Bilal Faye (LIPN, CNRS UMR 7030)
 

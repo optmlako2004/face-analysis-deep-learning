@@ -31,7 +31,7 @@ Toutes les metriques suivantes doivent etre calculees : Accuracy, AUC, AP, MAE, 
 
 *Repartition du travail*
 
-Ako Christian a pris en charge l'architecture Machine Learning, l'entrainement des modeles et l'integration TFLite. Calrd Similien s'est occupe du developpement Android, de la refonte de l'interface utilisateur et de la navigation. Noe Cervera a travaille sur l'entrainement, l'evaluation des metriques et les notebooks. Dhanoush Kessavane a gere les tests, la documentation et le rapport.
+Ako Christian a pris en charge l'architecture Machine Learning, l'entrainement des modeles et l'integration TFLite. Calrd Similien s'est occupe du developpement Android, de l'integration et de la navigation. Noe Cervera a travaille sur l'entrainement, l'evaluation des metriques et les notebooks. Dhanoush Kessavane a gere le front-end, le design et la documentation.
 
 
 # 3. Donnees et preprocessing
