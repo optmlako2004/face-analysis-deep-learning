@@ -93,3 +93,9 @@ training/output_moe/*.keras
 # FacePredictor.apk tracked via LFS
 # *.apk tracked via LFS
 FacePredictor.apk
+presentation_SAE.aux
+presentation_SAE.nav
+presentation_SAE.out
+presentation_SAE.snm
+presentation_SAE.tex
+presentation_SAE.toc
