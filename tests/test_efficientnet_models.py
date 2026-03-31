@@ -20,7 +20,17 @@ import config
 
 ASSETS = config.ANDROID_ASSETS_DIR
 DATA = config.IMAGES_DIR
-INPUT_SIZE = 128
+INPUT_SIZE = 128  # taille de chargement par défaut, sera mise à jour
+
+
+def get_model_input_size(model_path):
+    """Retourne la taille H/W attendue par le premier tensor d'entrée."""
+    interp = load_interpreter(model_path)
+    # interpreter déjà alloc dans load_interpreter
+    input_details = interp.get_input_details()[0]
+    # shape : [1, H, W, C]
+    h, w = input_details["shape"][1], input_details["shape"][2]
+    return int(h), int(w)
 def load_interpreter(model_path):
     # Try reference kernels first; fall back to flex delegate if needed
     try:
@@ -58,6 +68,13 @@ def load_image(path):
     return np.expand_dims(arr, axis=0)
 
 
+def resize_img(img, size):
+    """Redimensionne un batch 1xHxWx3 vers size x size si nécessaire."""
+    if img.shape[1] == size and img.shape[2] == size:
+        return img
+    return tf.image.resize(img, (size, size)).numpy().astype(np.float32)
+
+
 def parse_utkface_filename(path):
     """Parse age_gender_race from UTKFace filename."""
     name = os.path.basename(path).split("_")
@@ -85,12 +102,20 @@ def test_oriented_v2(images, labels):
     eth_model = load_interpreter(f"{ASSETS}/ethnicity_v2_model.tflite")
     eth_model.allocate_tensors()
 
+    gender_size = gender_model.get_input_details()[0]["shape"][1]
+    age_size = age_model.get_input_details()[0]["shape"][1]
+    eth_size = eth_model.get_input_details()[0]["shape"][1]
+
     correct_gender, correct_eth, total_age_error = 0, 0, 0
     start = time.time()
 
     for img, (true_age, true_gender, true_race) in zip(images, labels):
+        gender_img = resize_img(img, gender_size)
+        age_img = resize_img(img, age_size)
+        eth_img = resize_img(img, eth_size)
+
         # Gender (with CLAHE-like preprocessing)
-        pixels = img[0]
+        pixels = gender_img[0]
         lum = 0.299 * pixels[:,:,0] + 0.587 * pixels[:,:,1] + 0.114 * pixels[:,:,2]
         min_l, max_l = lum.min(), lum.max()
         r = max_l - min_l
@@ -98,7 +123,7 @@ def test_oriented_v2(images, labels):
             clahe_img = np.clip((pixels - min_l) * (255.0 / r), 0, 255).astype(np.float32)
             clahe_img = np.expand_dims(clahe_img, 0)
         else:
-            clahe_img = img
+            clahe_img = gender_img
 
         gender_model.set_tensor(gender_model.get_input_details()[0]['index'], clahe_img)
         gender_model.invoke()
@@ -106,12 +131,12 @@ def test_oriented_v2(images, labels):
         pred_gender = 1 if g_prob > 0.5 else 0
 
         # Age
-        age_model.set_tensor(age_model.get_input_details()[0]['index'], img)
+        age_model.set_tensor(age_model.get_input_details()[0]['index'], age_img)
         age_model.invoke()
         pred_age = int(np.clip(age_model.get_tensor(age_model.get_output_details()[0]['index'])[0][0], 0, 116))
 
         # Ethnicity (5 classes)
-        eth_model.set_tensor(eth_model.get_input_details()[0]['index'], img)
+        eth_model.set_tensor(eth_model.get_input_details()[0]['index'], eth_img)
         eth_model.invoke()
         eth_probs = eth_model.get_tensor(eth_model.get_output_details()[0]['index'])[0]
         pred_race = np.argmax(eth_probs)
@@ -139,12 +164,14 @@ def test_multitask_v4(images, labels):
 
     model = load_interpreter(f"{ASSETS}/multitask_model.tflite")
     model.allocate_tensors()
+    mt_size = model.get_input_details()[0]["shape"][1]
 
     correct_gender, correct_eth, total_age_error = 0, 0, 0
     start = time.time()
 
     for img, (true_age, true_gender, true_race) in zip(images, labels):
-        model.set_tensor(model.get_input_details()[0]['index'], img)
+        mt_img = resize_img(img, mt_size)
+        model.set_tensor(model.get_input_details()[0]['index'], mt_img)
         model.invoke()
 
         out_details = model.get_output_details()
@@ -185,12 +212,22 @@ def test_hybrid(images, labels):
     mt_model = load_interpreter(f"{ASSETS}/multitask_model.tflite")
     mt_model.allocate_tensors()
 
+    # Tailles attendues par chaque modèle
+    gender_size = gender_model.get_input_details()[0]["shape"][1]
+    age_size = age_model.get_input_details()[0]["shape"][1]
+    mt_size = mt_model.get_input_details()[0]["shape"][1]
+
     correct_gender, correct_eth, total_age_error = 0, 0, 0
     start = time.time()
 
     for img, (true_age, true_gender, true_race) in zip(images, labels):
+        # Adapter les tailles pour chaque modèle
+        gender_img = resize_img(img, gender_size)
+        age_img = resize_img(img, age_size)
+        mt_img = resize_img(img, mt_size)
+
         # Gender V2 with CLAHE
-        pixels = img[0]
+        pixels = gender_img[0]
         lum = 0.299 * pixels[:,:,0] + 0.587 * pixels[:,:,1] + 0.114 * pixels[:,:,2]
         min_l, max_l = lum.min(), lum.max()
         r = max_l - min_l
@@ -198,7 +235,7 @@ def test_hybrid(images, labels):
             clahe_img = np.clip((pixels - min_l) * (255.0 / r), 0, 255).astype(np.float32)
             clahe_img = np.expand_dims(clahe_img, 0)
         else:
-            clahe_img = img
+            clahe_img = gender_img
 
         gender_model.set_tensor(gender_model.get_input_details()[0]['index'], clahe_img)
         gender_model.invoke()
@@ -206,12 +243,12 @@ def test_hybrid(images, labels):
         pred_gender = 1 if g_prob > 0.5 else 0
 
         # Age V2
-        age_model.set_tensor(age_model.get_input_details()[0]['index'], img)
+        age_model.set_tensor(age_model.get_input_details()[0]['index'], age_img)
         age_model.invoke()
         pred_age = int(np.clip(age_model.get_tensor(age_model.get_output_details()[0]['index'])[0][0], 0, 116))
 
         # Ethnicity from V4 Multitask
-        mt_model.set_tensor(mt_model.get_input_details()[0]['index'], img)
+        mt_model.set_tensor(mt_model.get_input_details()[0]['index'], mt_img)
         mt_model.invoke()
         out_details = mt_model.get_output_details()
         eth_probs = mt_model.get_tensor(out_details[2]['index'])[0]
@@ -235,6 +272,20 @@ def test_hybrid(images, labels):
 
 if __name__ == "__main__":
     print("Chargement des images de test UTKFace...")
+
+    # Déterminer les tailles d'entrée attendues par chaque modèle
+    gender_h, gender_w = get_model_input_size(f"{ASSETS}/gender_v2_model.tflite")
+    age_h, age_w = get_model_input_size(f"{ASSETS}/age_v2_model.tflite")
+    mt_h, mt_w = get_model_input_size(f"{ASSETS}/multitask_model.tflite")
+    for h, w, name in [(gender_h, gender_w, "gender_v2"), (age_h, age_w, "age_v2"), (mt_h, mt_w, "multitask_v4")]:
+        if h != w:
+            raise ValueError(f"Input non carré attendu par {name}: {h}x{w}")
+
+    # On charge les images à la taille du modèle le plus grand (pour préserver l'info), puis on redimensionne à la volée
+    INPUT_SIZE = max(gender_h, age_h, mt_h)
+    print(
+        f"Tailles détectées — gender: {gender_h}, age: {age_h}, multitask: {mt_h}. Chargement à {INPUT_SIZE}."
+    )
 
     all_files = sorted(glob.glob(f"{DATA}/*.jpg*"))
     np.random.seed(42)

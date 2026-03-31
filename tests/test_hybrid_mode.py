@@ -27,6 +27,9 @@ GENDER_V2_MODEL = str(MODEL_DIR / "gender_v2_model.tflite")
 AGE_V2_MODEL = str(MODEL_DIR / "age_v2_model.tflite")
 MULTITASK_MODEL = str(MODEL_DIR / "multitask_model.tflite")
 
+# Input sizes will be detected at runtime from the models
+INPUT_SIZE = 128
+
 # Labels
 GENDER_LABELS = ["Homme", "Femme"]
 ETHNICITY_LABELS_V4 = ["Blanc", "Noir", "Asiatique", "Indien"]
@@ -58,12 +61,19 @@ def load_interpreter(model_path):
                 ) from exc
         raise
 
-def preprocess_image(image_path, size=(128, 128)):
-    """Preprocess image for model input"""
+def preprocess_image(image_path, size):
+    """Preprocess image for model input (returns float32 HxWx3)."""
     img = Image.open(image_path).convert('RGB')
-    img = img.resize(size)
+    img = img.resize((size, size))
     img_array = np.array(img, dtype=np.float32)
     return img_array
+
+
+def resize_img(img_array, size):
+    """Resize an HxWx3 array to size x size (float32)."""
+    if img_array.shape[0] == size and img_array.shape[1] == size:
+        return img_array
+    return tf.image.resize(img_array, (size, size)).numpy().astype(np.float32)
 
 def apply_clahe_simple(img_array):
     """Apply simple contrast enhancement (similar to Android CLAHE)"""
@@ -134,18 +144,24 @@ def predict_ethnicity_v4(interpreter, img_array):
 
     return ethnicity, confidence, ethnicity_probs
 
-def hybrid_predict(image_path, gender_interp, age_interp, multitask_interp):
+def hybrid_predict(image_path, gender_interp, age_interp, multitask_interp, sizes):
     """Hybrid prediction combining best models for each task"""
-    img_array = preprocess_image(image_path)
+    base_size = max(sizes.values())
+    img_array = preprocess_image(image_path, base_size)
+
+    # Resize per-model
+    gender_img = resize_img(img_array, sizes["gender"])
+    age_img = resize_img(img_array, sizes["age"])
+    mt_img = resize_img(img_array, sizes["mt"])
 
     # Gender from V2 (best for gender)
-    gender, gender_conf, gender_prob = predict_gender_v2(gender_interp, img_array)
+    gender, gender_conf, gender_prob = predict_gender_v2(gender_interp, gender_img)
 
     # Age from V2
-    age = predict_age_v2(age_interp, img_array)
+    age = predict_age_v2(age_interp, age_img)
 
     # Ethnicity from V4 Multitask (best for ethnicity)
-    ethnicity, eth_conf, eth_probs = predict_ethnicity_v4(multitask_interp, img_array)
+    ethnicity, eth_conf, eth_probs = predict_ethnicity_v4(multitask_interp, mt_img)
 
     return {
         'gender': gender,
@@ -173,6 +189,14 @@ def main():
     multitask_interp = load_interpreter(MULTITASK_MODEL)
     print("✓ Tous les modèles chargés")
 
+    # Detect input sizes per model
+    sizes = {
+        "gender": int(gender_interp.get_input_details()[0]["shape"][1]),
+        "age": int(age_interp.get_input_details()[0]["shape"][1]),
+        "mt": int(multitask_interp.get_input_details()[0]["shape"][1]),
+    }
+    print(f"Tailles d'entrée détectées: gender {sizes['gender']}, age {sizes['age']}, multitask {sizes['mt']}")
+
     # Test images (verified paths)
     test_images = [
         (config.IMAGES_DIR / "25_1_0_20170103163054063.jpg.chip.jpg", 25, "Femme", "Blanc"),
@@ -195,7 +219,7 @@ def main():
             print(f"\n⚠ Image non trouvée: {img_path}")
             continue
 
-        result = hybrid_predict(img_path, gender_interp, age_interp, multitask_interp)
+        result = hybrid_predict(img_path, gender_interp, age_interp, multitask_interp, sizes)
 
         # Check correctness
         gender_ok = result['gender'] == true_gender

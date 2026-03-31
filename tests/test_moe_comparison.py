@@ -42,21 +42,22 @@ def load_interpreter(model_path):
         interpreter.allocate_tensors()
         return interpreter
     except ValueError as exc:
-        if "FULLY_CONNECTED" in str(exc):
-            try:
-                flex_delegate = tf.lite.experimental.load_delegate("libtensorflowlite_flex.so")
-                interpreter = tf.lite.Interpreter(
-                    model_path=model_path,
-                    experimental_op_resolver_type=tf.lite.experimental.OpResolverType.BUILTIN_REF,
-                    experimental_delegates=[flex_delegate],
-                )
-                interpreter.allocate_tensors()
-                return interpreter
-            except Exception:
-                raise RuntimeError(
-                    "FULLY_CONNECTED v12 non pris en charge: installez TensorFlow >= 2.17/ tf-nightly ou assurez-vous que libtensorflowlite_flex.so est disponible"
-                ) from exc
-        raise
+        # Try with Flex delegate for newer/bigger op versions (CAST v5, FULLY_CONNECTED v12, etc.)
+        try:
+            flex_delegate = tf.lite.experimental.load_delegate("libtensorflowlite_flex.so")
+            interpreter = tf.lite.Interpreter(
+                model_path=model_path,
+                experimental_op_resolver_type=tf.lite.experimental.OpResolverType.BUILTIN_REF,
+                experimental_delegates=[flex_delegate],
+            )
+            interpreter.allocate_tensors()
+            return interpreter
+        except Exception:
+            msg = (
+                "Op non supporte par le runtime TFLite actuel. "
+                "Installez TensorFlow >= 2.17 ou ajoutez libtensorflowlite_flex.so au LD_LIBRARY_PATH."
+            )
+            raise RuntimeError(msg) from exc
 
 def preprocess_image(image_path, size=(128, 128)):
     img = Image.open(image_path).convert('RGB')
