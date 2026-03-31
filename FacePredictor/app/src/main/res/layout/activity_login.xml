@@ -240,6 +240,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
+                android:layout_gravity="center_horizontal"
                 android:background="@drawable/bg_badge_ink"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="10dp"
