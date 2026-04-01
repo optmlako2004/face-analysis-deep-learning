@@ -160,7 +160,7 @@ class FacePredictorHybrid(private val context: Context) {
             1 -> Ethnicity.BLACK
             2 -> Ethnicity.ASIAN
             3 -> Ethnicity.INDIAN
-            4 -> Ethnicity.OTHER
+            4 -> Ethnicity.OTHERS
             else -> Ethnicity.WHITE
         }
     }

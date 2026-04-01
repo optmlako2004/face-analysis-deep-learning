@@ -15,7 +15,7 @@ class FacePredictorApp : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        FirebaseAuthService.init(this)
+        FirebaseAuthService.getInstance()
 
         // Apply dark mode preference at startup
         val sessionManager = SessionManager(this)
