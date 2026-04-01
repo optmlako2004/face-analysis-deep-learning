@@ -116,7 +116,24 @@ Le modele multi-tache MoE atteint 90.7 pourcent d'accuracy en genre avec un AUC 
 Les autres metriques demandees sont : AP de 95.3 pourcent pour le genre et 80.8 pourcent pour l'ethnicite, ARI de 0.663 pour le genre et 0.452 pour l'ethnicite, NMI de 0.554 pour le genre et 0.408 pour l'ethnicite, et MSE de 86.3 pour l'age.
 
 
-# 7. Strategie 3 — Comparaison des backbones
+# 7. Mode Hybride — Initiative de l'equipe
+
+## L'idee
+
+Apres avoir entraine les trois modeles specialises et le modele multi-tache MoE, nous avons constate que chaque modele avait ses forces : le modele d'age specialise avait le meilleur MAE, le modele de genre la meilleure accuracy, etc. Nous avons alors eu l'idee de combiner les meilleurs points de chaque modele dans un mode unique que nous avons appele Hybride.
+
+## Fonctionnement
+
+Le mode Hybride charge les trois modeles specialises (age, genre, ethnicite) et applique du Test Time Augmentation (TTA). Pour chaque image, le mode effectue deux inferences par modele : une sur l'image originale et une sur l'image retournee horizontalement. Les predictions sont ensuite moyennees, ce qui reduit le bruit et stabilise les resultats.
+
+## Resultats
+
+Le mode Hybride obtient les meilleurs resultats de tous nos modes. Sur un echantillon de 10 images du jeu de test, il atteint 100 pourcent de precision en genre (10/10), 80 pourcent en ethnicite (8/10) et un MAE de 3.3 ans en age. Ces resultats sont superieurs au MoE (8/10 genre, 6/10 ethnicite, 3.9 MAE) et aux modeles individuels sans TTA.
+
+C'est pour cette raison que le mode Hybride est le mode par defaut de l'application.
+
+
+# 8. Strategie 3 — Comparaison des backbones
 
 ## Protocole
 
@@ -139,7 +156,7 @@ MobileNetV2 est le moins performant avec un score de 8.37, surtout en ethnicite 
 EfficientNetB0 est selectionne comme meilleur backbone. Il offre le meilleur compromis entre precision, taille du modele et vitesse d'entrainement. Sa taille raisonnable (environ 8 Mo en TFLite) le rend adapte au deploiement mobile.
 
 
-# 8. Interpretabilite du modele
+# 9. Interpretabilite du modele
 
 ## Pourquoi l'interpretabilite
 
@@ -158,7 +175,7 @@ Le modele se focalise principalement sur le visage et non sur les cheveux, les v
 Le modele n'utilise ni infrarouge ni capteur thermique. Il analyse uniquement les patterns statistiques dans les pixels de l'image.
 
 
-# 9. Deploiement TensorFlow Lite
+# 10. Deploiement TensorFlow Lite
 
 ## Conversion
 
@@ -173,7 +190,7 @@ Les trois modeles individuels (age, genre, ethnicite) pesent chacun 8.4 Mo en TF
 Le temps moyen d'inference est d'environ 100 a 200 millisecondes par image sur un smartphone de milieu de gamme.
 
 
-# 10. Application Android
+# 11. Application Android
 
 ## Technologies utilisees
 
@@ -208,7 +225,7 @@ Le mode Hybride offre la meilleure precision grace au TTA mais charge trois mode
 L'interface suit une palette "Tech bleu / gris" professionnelle. La couleur primaire est un bleu navy, la secondaire un steel blue. Le design utilise des panels avec effets glassmorphiques, des badges, et supporte entierement le mode sombre.
 
 
-# 11. Resultats et metriques
+# 12. Resultats et metriques
 
 ## Metriques d'evaluation
 
@@ -227,7 +244,7 @@ Le mode Hybride (3 modeles + TTA) teste sur 20 images atteint 95 pourcent en gen
 La confiance du genre provient directement de la probabilite sigmoid du modele. La confiance de l'ethnicite provient de la probabilite softmax maximale. La confiance de l'age est estimee en fonction de la representativite de la tranche d'age dans le dataset : les ages de 15 a 55 ans, mieux representes, obtiennent une confiance plus elevee.
 
 
-# 12. Difficultes rencontrees
+# 13. Difficultes rencontrees
 
 La principale contrainte a ete la VRAM limitee a 6 Go de notre GPU NVIDIA RTX 4050 Laptop. Cela a impose un batch size reduit a 4 pendant le fine-tuning, un nombre de couches debloquees limite a 15 puis 30 au lieu de tout le backbone, un nettoyage memoire systematique entre les phases d'entrainement, et une limite explicite de la VRAM a 5 Go pour eviter les crashs du systeme.
 
@@ -238,7 +255,7 @@ Le modele confond parfois les classes Asian et Indian en raison de traits visuel
 Les premieres executions donnaient des resultats variables entre les backbones. La fixation des seeds pour numpy, tensorflow et random a resolu ce probleme de reproductibilite.
 
 
-# 13. Conclusion
+# 14. Conclusion
 
 Nous avons implemente avec succes les trois strategies de modelisation demandees par le sujet et deploye le meilleur modele dans une application Android fonctionnelle et professionnelle. Le MoE, ajoute par initiative personnelle apres nos recherches, a permis d'ameliorer les performances du modele multi-tache.
 
