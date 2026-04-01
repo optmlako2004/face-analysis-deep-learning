@@ -1,6 +1,7 @@
 package com.sae.facepredictor.ui.main
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
@@ -34,6 +35,12 @@ class MainActivity : AppCompatActivity() {
         if (userId != null && !sessionManager.hasSeenTutorial(userId)) {
             startActivity(Intent(this, TutorialActivity::class.java))
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Dark mode change handled without recreating the activity
+        recreate()
     }
 
     private fun setupNavigation() {

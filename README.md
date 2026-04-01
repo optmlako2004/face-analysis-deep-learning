@@ -311,12 +311,18 @@ Les notebooks sont dans `training/` et doivent etre executes dans l'ordre :
 Chaque notebook est **independant** et peut etre execute separement.
 Les resultats du notebook 1 (meilleur backbone) sont automatiquement utilises par les notebooks 2 et 3.
 
-### 5. Application Android
+### 5. Telecharger l'APK
+
+L'APK pre-construite est disponible dans la section [Releases](https://github.com/optmlako2004/face-analysis-deep-learning/releases) du depot. Cliquer sur `FacePredictor.apk` pour la telecharger et l'installer sur un appareil Android.
+
+### 6. Builder l'APK soi-meme (optionnel)
 
 ```bash
 cd FacePredictor
 ./gradlew assembleDebug         # Genere l'APK debug
 ```
+
+L'APK generee se trouve dans `FacePredictor/app/build/outputs/apk/debug/app-debug.apk`.
 
 Ou via Android Studio :
 1. Ouvrir le dossier `FacePredictor/` dans Android Studio

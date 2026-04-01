@@ -18,8 +18,8 @@
     <color name="text_primary">#E8EDF2</color>
     <color name="text_secondary">#8C9BAA</color>
     <color name="text_tertiary">#5C6D7E</color>
-    <color name="text_on_primary">#0F1923</color>
-    <color name="text_on_secondary">#0F1923</color>
+    <color name="text_on_primary">#E8EDF2</color>
+    <color name="text_on_secondary">#E8EDF2</color>
     <color name="success">#4ADE80</color>
     <color name="success_light">#132B1E</color>
     <color name="warning">#FBBF24</color>
