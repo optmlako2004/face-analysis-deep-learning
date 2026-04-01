@@ -83,12 +83,8 @@ class SettingsFragment : Fragment() {
             sessionManager.darkMode = newMode
             updateDarkModeDesc(newMode)
 
-            AppCompatDelegate.setDefaultNightMode(
-                if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
-
             LogCapture.i(TAG, "Dark mode: ${if (isChecked) "ON" else "OFF"}")
+            requireContext().showToast("Mode sombre ${if (isChecked) "active" else "desactive"}. Redemarrez l'app pour appliquer.")
         }
     }
 

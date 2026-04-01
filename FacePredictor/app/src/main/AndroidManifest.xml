@@ -42,7 +42,6 @@
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="false"
-            android:configChanges="uiMode"
             android:theme="@style/Theme.FacePredictor" />
 
         <!-- Camera Activity -->
