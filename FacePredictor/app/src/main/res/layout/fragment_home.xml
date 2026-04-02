@@ -50,7 +50,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="20dp"
             android:orientation="vertical">
 
             <com.google.android.material.card.MaterialCardView
@@ -263,51 +263,46 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_panel_paper"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="22dp">
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:text="@string/home_video_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/model_info"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
 
-                    <TextView
+                    <VideoView
+                        android:id="@+id/videoDemo"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:fontFamily="sans-serif-condensed"
-                        android:text="@string/home_video_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="28sp"
-                        android:textStyle="bold" />
+                        android:layout_height="420dp"
+                        android:layout_gravity="center" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="@string/home_video_placeholder"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="15sp" />
+                    <ImageView
+                        android:id="@+id/ivPlayIcon"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_play_circle"
+                        app:tint="@color/secondary"
+                        android:contentDescription="Lancer la video" />
 
-                </LinearLayout>
+                </FrameLayout>
 
-                <ImageView
-                    android:id="@+id/ivPlayIcon"
-                    android:layout_width="54dp"
-                    android:layout_height="54dp"
-                    android:layout_marginStart="16dp"
-                    android:src="@drawable/ic_play_circle"
-                    app:tint="@color/secondary" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Demonstration de l'application FacePredictor"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
 
             </LinearLayout>
 
