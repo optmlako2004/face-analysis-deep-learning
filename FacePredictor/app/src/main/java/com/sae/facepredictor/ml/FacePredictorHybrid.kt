@@ -76,23 +76,27 @@ class FacePredictorHybrid(private val context: Context) {
         return mappedBuffer
     }
 
+    @Volatile
+    private var isPredicting = false
+
     fun predict(bitmap: Bitmap): PredictionResult? {
+        // Prevent concurrent predictions (crash on low-end devices)
+        if (isPredicting) return null
+        isPredicting = true
+
         LogCapture.d(TAG, "Starting HYBRID prediction on bitmap ${bitmap.width}x${bitmap.height}")
 
         if (genderInterpreter == null || ageInterpreter == null || ethnicityInterpreter == null) {
             LogCapture.e(TAG, "Models not loaded. Init error: $initError")
+            isPredicting = false
             return null
         }
 
         return try {
             val resizedBitmap = Bitmap.createScaledBitmap(bitmap, inputSize, inputSize, true)
-
-            // Prepare input buffers (original + flipped for TTA)
             val inputBuffer = bitmapToByteBuffer(resizedBitmap)
-            val flippedBitmap = flipHorizontally(resizedBitmap)
-            val inputBufferFlipped = bitmapToByteBuffer(flippedBitmap)
 
-            // === Genre from V2 specialise ===
+            // === Genre ===
             val genderOutput = Array(1) { FloatArray(1) }
             inputBuffer.rewind()
             genderInterpreter!!.run(inputBuffer, genderOutput)
@@ -100,37 +104,21 @@ class FacePredictorHybrid(private val context: Context) {
             val genderProb = genderOutput[0][0]
             val gender = if (genderProb > genderThreshold) Gender.FEMALE else Gender.MALE
             val genderConfidence = if (genderProb > genderThreshold) genderProb else (1f - genderProb)
-            LogCapture.d(TAG, "Gender (V2): ${gender.label} (conf: ${genderConfidence * 100}%)")
 
-            // === Age: V2 avec TTA (original + flipped, moyenne) ===
+            // === Age ===
             val ageOutput = Array(1) { FloatArray(1) }
             inputBuffer.rewind()
             ageInterpreter!!.run(inputBuffer, ageOutput)
-            val ageOriginal = ageOutput[0][0]
+            val age = ageOutput[0][0].toInt().coerceIn(0, 116)
 
-            val ageOutputFlipped = Array(1) { FloatArray(1) }
-            inputBufferFlipped.rewind()
-            ageInterpreter!!.run(inputBufferFlipped, ageOutputFlipped)
-            val ageFlipped = ageOutputFlipped[0][0]
-
-            val ageAvg = (ageOriginal + ageFlipped) / 2f
-            val age = ageAvg.toInt().coerceIn(0, 116)
-            LogCapture.d(TAG, "Age TTA: original=${"%.1f".format(ageOriginal)}, flipped=${"%.1f".format(ageFlipped)} => $age ans")
-
-            // === Ethnicite: V2 specialise avec TTA ===
+            // === Ethnicite ===
             val ethOutput = Array(1) { FloatArray(5) }
             inputBuffer.rewind()
             ethnicityInterpreter!!.run(inputBuffer, ethOutput)
 
-            val ethOutputFlipped = Array(1) { FloatArray(5) }
-            inputBufferFlipped.rewind()
-            ethnicityInterpreter!!.run(inputBufferFlipped, ethOutputFlipped)
-
-            val ethProbsAvg = FloatArray(5) { (ethOutput[0][it] + ethOutputFlipped[0][it]) / 2f }
-            val maxIdx = ethProbsAvg.indices.maxByOrNull { ethProbsAvg[it] } ?: 0
+            val maxIdx = ethOutput[0].indices.maxByOrNull { ethOutput[0][it] } ?: 0
             val ethnicity = ethnicityFromIndex(maxIdx)
-            val ethnicityConfidence = ethProbsAvg[maxIdx]
-            LogCapture.d(TAG, "Ethnicity TTA: ${ethnicity.label} (conf: ${ethnicityConfidence * 100}%)")
+            val ethnicityConfidence = ethOutput[0][maxIdx]
 
             LogCapture.i(TAG, "HYBRID Result: Age=$age, Gender=${gender.label}, Ethnicity=${ethnicity.label}")
 
@@ -145,6 +133,8 @@ class FacePredictorHybrid(private val context: Context) {
         } catch (e: Exception) {
             LogCapture.e(TAG, "Hybrid prediction failed: ${e.message}", e)
             null
+        } finally {
+            isPredicting = false
         }
     }
 
