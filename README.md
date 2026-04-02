@@ -5,6 +5,12 @@ Universite Sorbonne Paris Nord
 
 Application mobile Android intelligente capable de predire l'age, le genre et l'ethnicite d'une personne a partir de son visage, a l'aide de modeles de Deep Learning optimises et deployes avec TensorFlow Lite.
 
+## Video de demonstration
+
+https://github.com/user-attachments/assets/demo_video.mp4
+
+https://github.com/optmlako2004/face-analysis-deep-learning/raw/main/demo_video.mp4
+
 ## Equipe
 
 | Membre | Role |
